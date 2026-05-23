@@ -17,6 +17,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('employee_id', 50)->nullable()->unique()->comment('NIP / ID Karyawan');
+            $table->string('phone', 20)->nullable();
+            $table->enum('role', ['admin', 'sarpras', 'unit'])->default('unit');
+            $table->boolean('is_active')->default(true);
             $table->rememberToken();
             $table->timestamps();
         });
