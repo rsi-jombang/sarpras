@@ -75,14 +75,6 @@
             });
         }
 
-        // Active link detection
-        const currentPath = window.location.href;
-        sidebar.querySelectorAll(".nav-link").forEach((link) => {
-            if (link.href && currentPath.includes(link.getAttribute("href"))) {
-                link.classList.add("active");
-            }
-        });
-
         function setSidebarCollapsed(collapse) {
             sidebar.classList.toggle("collapsed", collapse);
             mainContent.classList.toggle("expanded", collapse);

@@ -1,7 +1,7 @@
 <aside id="sidebar" class="sidebar" aria-label="Main Navigation">
 
     {{-- Brand --}}
-    <a href="" class="sidebar-brand">
+    <a href="{{ route('dashboard') }}" class="sidebar-brand">
         <div class="brand-logo">
             <i class="bi bi-hexagon-fill"></i>
         </div>
@@ -18,14 +18,14 @@
         </li>
 
         <li class="nav-item">
-            <a href="" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <i class="bi bi-grid-1x2-fill nav-icon"></i>
                 <span class="nav-label">Dashboard</span>
             </a>
         </li>
 
         <li class="nav-item">
-            <a href="" class="nav-link {{ request()->routeIs('analytics*') ? 'active' : '' }}">
+            <a href="#" class="nav-link {{ request()->routeIs('analytics*') ? 'active' : '' }}">
                 <i class="bi bi-bar-chart-fill nav-icon"></i>
                 <span class="nav-label">Analytics</span>
             </a>
@@ -47,12 +47,12 @@
             <div id="usersMenu" class="collapse {{ request()->routeIs('users*') ? 'show' : '' }}">
                 <ul class="sidebar-submenu">
                     <li>
-                        <a href="" class="nav-link {{ request()->routeIs('users.index') ? 'active' : '' }}">
+                        <a href="#" class="nav-link {{ request()->routeIs('users.index') ? 'active' : '' }}">
                             All Users
                         </a>
                     </li>
                     <li>
-                        <a href="" class="nav-link {{ request()->routeIs('users.create') ? 'active' : '' }}">
+                        <a href="#" class="nav-link {{ request()->routeIs('users.create') ? 'active' : '' }}">
                             Add User
                         </a>
                     </li>
@@ -60,14 +60,20 @@
             </div>
         </li>
 
-        {{-- dst sesuai kebutuhan... --}}
+        {{-- Master Unit --}}
+        <li class="nav-item">
+            <a href="{{ route('units.index') }}" class="nav-link {{ request()->routeIs('units*') ? 'active' : '' }}">
+                <i class="bi bi-hospital nav-icon"></i>
+                <span class="nav-label">Master Unit</span>
+            </a>
+        </li>
 
         <li>
             <div class="sidebar-label">System</div>
         </li>
 
         <li class="nav-item">
-            <a href="" class="nav-link {{ request()->routeIs('settings*') ? 'active' : '' }}">
+            <a href="#" class="nav-link {{ request()->routeIs('settings*') ? 'active' : '' }}">
                 <i class="bi bi-gear-fill nav-icon"></i>
                 <span class="nav-label">Settings</span>
             </a>
