@@ -67,6 +67,13 @@
                 <span class="nav-label">Master Unit</span>
             </a>
         </li>
+        <li class="nav-item">
+            <a href="{{ route('category.index') }}"
+                class="nav-link {{ request()->routeIs('category*') ? 'active' : '' }}">
+                <i class="bi bi-hospital nav-icon"></i>
+                <span class="nav-label">Master Kategori</span>
+            </a>
+        </li>
 
         <li>
             <div class="sidebar-label">System</div>

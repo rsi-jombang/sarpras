@@ -1,0 +1,146 @@
+/* Override DataTables premium styling */
+.dataTables_wrapper .dataTables_paginate .paginate_button.active .page-link {
+    background-color: var(--accent-primary) !important;
+    border-color: var(--accent-primary) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button .page-link {
+    color: var(--text-secondary);
+    background-color: var(--bg-surface);
+    border-color: var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 6px 12px;
+    transition: var(--transition);
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button .page-link:hover {
+    background-color: var(--bg-surface-2);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+.dataTables_wrapper .dataTables_info {
+    color: var(--text-secondary) !important;
+    font-size: 13px;
+}
+
+.dataTables_wrapper .dataTables_length select {
+    background-color: var(--bg-surface-2) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+    border-radius: var(--radius-sm) !important;
+    font-size: 13px;
+    padding: 4px 8px;
+}
+
+table.dataTable {
+    border-color: var(--border-color) !important;
+    margin-top: 15px !important;
+    margin-bottom: 15px !important;
+}
+
+table.dataTable thead tr {
+    border-bottom: 2px solid var(--border-color) !important;
+    background-color: var(--bg-surface-2) !important;
+}
+
+table.dataTable thead th {
+    color: var(--text-secondary) !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px 16px !important;
+    border-bottom: none !important;
+}
+
+table.dataTable tbody td {
+    color: var(--text-primary);
+    font-size: 13.5px;
+    padding: 14px 16px !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+/* Hide default search box to use our custom premium search input */
+.dataTables_filter {
+    display: none;
+}
+
+/* Switch toggle premium style */
+.form-switch .form-check-input {
+    width: 2.2em;
+    height: 1.2em;
+    background-color: var(--border-color);
+    border-color: var(--border-color);
+    transition: background-position .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.form-switch .form-check-input:checked {
+    background-color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+}
+
+.form-switch .form-check-input:focus {
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+/* Premium Modal Overrides */
+.modal-content {
+    background: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color) !important;
+    padding: 20px 24px !important;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color) !important;
+    padding: 16px 24px !important;
+}
+
+.modal-body {
+    padding: 24px !important;
+}
+
+.form-label {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.form-control, .form-select {
+    background: var(--bg-surface-2) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--text-primary) !important;
+    padding: 10px 14px;
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--accent-primary) !important;
+    box-shadow: var(--shadow-glow) !important;
+    background: var(--bg-surface) !important;
+    outline: none;
+}
+
+/* Custom Stats Card Icons */
+.stats-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}

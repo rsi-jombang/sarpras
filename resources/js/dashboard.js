@@ -75,6 +75,24 @@
             });
         }
 
+        // Mobile toggle
+        if (mobileToggle) {
+            const backdrop = document.createElement("div");
+            backdrop.className = "sidebar-backdrop";
+            document.body.appendChild(backdrop);
+
+            mobileToggle.addEventListener("click", function (e) {
+                e.preventDefault();
+                sidebar.classList.add("mobile-show");
+                backdrop.classList.add("show");
+            });
+
+            backdrop.addEventListener("click", function () {
+                sidebar.classList.remove("mobile-show");
+                backdrop.classList.remove("show");
+            });
+        }
+
         function setSidebarCollapsed(collapse) {
             sidebar.classList.toggle("collapsed", collapse);
             mainContent.classList.toggle("expanded", collapse);

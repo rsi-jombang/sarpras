@@ -48,9 +48,9 @@ class UnitController extends Controller
                 ->make(true);
         }
 
-        $totalUnits = Unit::count('*');
-        $activeUnits = Unit::count('is_active', true);
-        $inactiveUnits = Unit::count('is_active', false);
+        $totalUnits    = Unit::count();
+        $activeUnits   = Unit::where('is_active', true)->count();
+        $inactiveUnits = Unit::where('is_active', false)->count();
 
         return view('unit.index', compact('totalUnits', 'activeUnits', 'inactiveUnits'));
     }

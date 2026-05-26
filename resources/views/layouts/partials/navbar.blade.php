@@ -8,8 +8,7 @@
     </button>
 
     <!-- Mobile Menu Trigger -->
-    <button class="sidebar-toggle-btn d-flex d-lg-none" id="mobileSidebarToggle" data-bs-toggle="offcanvas"
-        data-bs-target="#mobileSidebar" aria-label="Open Sidebar">
+    <button class="sidebar-toggle-btn d-flex d-lg-none" id="mobileSidebarToggle" aria-label="Open Sidebar">
         <i class="bi bi-list"></i>
     </button>
 

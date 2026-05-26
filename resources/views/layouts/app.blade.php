@@ -10,6 +10,9 @@
     {{-- Vite akan otomatis inject CSS yang sudah di-compile --}}
     @vite(['resources/scss/app.scss', 'resources/js/app.js'])
 
+    <!-- Global CDNs (DataTables CSS) -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+
     @stack('styles')
 </head>
 
@@ -69,6 +72,12 @@
 
         </div>
     </div>
+
+    <!-- Global CDNs (jQuery, DataTables, SweetAlert2) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     @stack('scripts')
 </body>

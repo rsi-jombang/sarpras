@@ -1855,6 +1855,16 @@ right: -100px;
         transform: translateX(-100%);
     }
 
+    .sidebar.mobile-show {
+        transform: translateX(0);
+        box-shadow: 10px 0 40px rgba(0, 0, 0, 0.4);
+        height: 100% !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        background-color: var(--bg-sidebar) !important;
+        border-radius: 0 !important;
+    }
+
     .main-content {
         margin-left: 0 !important;
     }
@@ -1862,6 +1872,29 @@ right: -100px;
     .navbar-search {
         display: none;
     }
+}
+
+/* ── Mobile Sidebar Backdrop ─ */
+.sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1035; /* Dibawah sidebar (1040) */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar-backdrop.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+[data-theme="dark"] .sidebar-backdrop {
+    background: rgba(0, 0, 0, 0.7);
 }
 
 @media (max-width: 767.98px) {

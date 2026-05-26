@@ -2,160 +2,6 @@
 
 @section('title', 'Master Unit')
 
-@push('styles')
-    <!-- DataTables Bootstrap 5 CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
-
-    <style>
-        /* Override DataTables premium styling */
-        .dataTables_wrapper .dataTables_paginate .paginate_button.active .page-link {
-            background-color: var(--accent-primary) !important;
-            border-color: var(--accent-primary) !important;
-            color: #fff !important;
-            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
-        }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button .page-link {
-            color: var(--text-secondary);
-            background-color: var(--bg-surface);
-            border-color: var(--border-color);
-            border-radius: var(--radius-sm);
-            padding: 6px 12px;
-            transition: var(--transition);
-        }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button .page-link:hover {
-            background-color: var(--bg-surface-2);
-            color: var(--text-primary);
-            border-color: var(--border-color);
-        }
-
-        .dataTables_wrapper .dataTables_info {
-            color: var(--text-secondary) !important;
-            font-size: 13px;
-        }
-
-        .dataTables_wrapper .dataTables_length select {
-            background-color: var(--bg-surface-2) !important;
-            border-color: var(--border-color) !important;
-            color: var(--text-primary) !important;
-            border-radius: var(--radius-sm) !important;
-            font-size: 13px;
-            padding: 4px 8px;
-        }
-
-        table.dataTable {
-            border-color: var(--border-color) !important;
-            margin-top: 15px !important;
-            margin-bottom: 15px !important;
-        }
-
-        table.dataTable thead tr {
-            border-bottom: 2px solid var(--border-color) !important;
-            background-color: var(--bg-surface-2) !important;
-        }
-
-        table.dataTable thead th {
-            color: var(--text-secondary) !important;
-            font-weight: 600 !important;
-            font-size: 13px !important;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 12px 16px !important;
-            border-bottom: none !important;
-        }
-
-        table.dataTable tbody td {
-            color: var(--text-primary);
-            font-size: 13.5px;
-            padding: 14px 16px !important;
-            border-bottom: 1px solid var(--border-color) !important;
-        }
-
-        /* Hide default search box to use our custom premium search input */
-        .dataTables_filter {
-            display: none;
-        }
-
-        /* Switch toggle premium style */
-        .form-switch .form-check-input {
-            width: 2.2em;
-            height: 1.2em;
-            background-color: var(--border-color);
-            border-color: var(--border-color);
-            transition: background-position .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
-        }
-
-        .form-switch .form-check-input:checked {
-            background-color: var(--accent-primary);
-            border-color: var(--accent-primary);
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
-        }
-
-        .form-switch .form-check-input:focus {
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
-        }
-
-        /* Premium Modal Overrides */
-        .modal-content {
-            background: var(--bg-surface) !important;
-            border: 1px solid var(--border-color) !important;
-            border-radius: var(--radius-lg) !important;
-            box-shadow: var(--shadow-lg) !important;
-        }
-
-        .modal-header {
-            border-bottom: 1px solid var(--border-color) !important;
-            padding: 20px 24px !important;
-        }
-
-        .modal-footer {
-            border-top: 1px solid var(--border-color) !important;
-            padding: 16px 24px !important;
-        }
-
-        .modal-body {
-            padding: 24px !important;
-        }
-
-        .form-label {
-            font-weight: 600;
-            font-size: 13px;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-        }
-
-        .form-control {
-            background: var(--bg-surface-2) !important;
-            border: 1px solid var(--border-color) !important;
-            border-radius: var(--radius-md) !important;
-            color: var(--text-primary) !important;
-            padding: 10px 14px;
-            font-size: 14px;
-            transition: var(--transition);
-        }
-
-        .form-control:focus {
-            border-color: var(--accent-primary) !important;
-            box-shadow: var(--shadow-glow) !important;
-            background: var(--bg-surface) !important;
-            outline: none;
-        }
-
-        /* Custom Stats Card Icons */
-        .stats-icon-wrap {
-            width: 48px;
-            height: 48px;
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-    </style>
-@endpush
-
 @section('content')
     <div class="container-fluid px-4 py-4">
 
@@ -322,14 +168,8 @@
 @endsection
 
 @push('scripts')
-    <!-- Load jQuery, DataTables & SweetAlert2 via CDN -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
-        $(document).ready(function() {
+        document.addEventListener('DOMContentLoaded', function() {
             // CSRF Token Setup untuk AJAX
             $.ajaxSetup({
                 headers: {
@@ -337,31 +177,7 @@
                 }
             });
 
-            // 1. Helper Konfigurasi SweetAlert 2 yang responsif terhadap Dark/Light Mode
-            function getSwalConfig() {
-                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-                return {
-                    background: isDark ? '#111318' : '#ffffff',
-                    color: isDark ? '#f1f5f9' : '#0f172a',
-                    confirmButtonColor: '#4f46e5',
-                    cancelButtonColor: '#64748b',
-                };
-            }
-
-            // Toast Config Helper
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                }
-            });
-
-            // 2. Inisialisasi Yajra DataTable
+            // 1. INIT DATATABLE
             const table = $('#unitTable').DataTable({
                 processing: true,
                 serverSide: true,
@@ -380,83 +196,54 @@
                     { data: 'status', name: 'status', orderable: false, searchable: false, className: 'text-center' },
                     { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-end' }
                 ],
-                order: [[1, 'asc']], // Urut berdasarkan Kode Unit secara default
-                language: {
-                    url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/id.json" // Lokalisasi Bahasa Indonesia
-                },
-                pageLength: 10,
-                lengthMenu: [10, 25, 50, 100],
-                drawCallback: function() {
-                    // Re-apply event listeners when table redraws (pagination, sort, search)
-                    initTableRowHighlight();
+                order: [[1, 'asc']],
+                language: { url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/id.json" },
+                createdRow: function(row, data, dataIndex) {
+                    if (data.is_active == 0) {
+                        $(row).css('background-color', 'rgba(255,0,0,0.03)');
+                        $(row).find('td').css('opacity', '0.7');
+                    }
                 }
             });
 
-            // Event untuk Custom Search Input
+            // 3. Custom Search Input Logic
             $('#tableSearch').keyup(function() {
                 table.search($(this).val()).draw();
             });
 
-            // Highlight baris tabel saat dicentang (opsional pendukung dashboard)
-            function initTableRowHighlight() {
-                $('.row-check').change(function() {
-                    $(this).closest('tr').toggleClass('table-active', this.checked);
-                });
+            // Helper Konfigurasi SweetAlert 2
+            function getSwalConfig() {
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                return {
+                    background: isDark ? '#111318' : '#ffffff',
+                    color: isDark ? '#f1f5f9' : '#0f172a',
+                    confirmButtonColor: '#4f46e5',
+                    cancelButtonColor: '#64748b',
+                };
             }
 
-            // 3. Konfigurasi Label Switch Toggle dalam Modal
-            $('#unitActive').change(function() {
-                if (this.checked) {
-                    $('#unitActiveLabel').text('Unit Aktif').removeClass('text-muted').addClass('text-success');
-                } else {
-                    $('#unitActiveLabel').text('Unit Non-Aktif').removeClass('text-success').addClass('text-muted');
-                }
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
             });
 
-            // 4. Buka Modal Tambah Unit
-            $('#btnCreateUnit').click(function() {
-                // Reset form & validasi
-                $('#unitForm')[0].reset();
-                $('#unitForm .is-invalid').removeClass('is-invalid');
-                $('#unitForm .invalid-feedback').text('');
-
-                // Set parameter modal untuk Create
-                $('#unitId').val('');
-                $('#formMethod').val('POST');
-                $('#unitModalTitle').text('Tambah Unit Kerja Baru');
-                $('#btnText').text('Simpan Unit');
-
-                // Reset active switch ke default true
-                $('#unitActive').prop('checked', true).trigger('change');
-
-                // Tampilkan Modal
-                $('#unitModal').modal('show');
-            });
-
-            // 5. Submit Form (Tambah / Edit via AJAX)
+            // Submit Form (Tambah / Edit)
             $('#unitForm').submit(function(e) {
                 e.preventDefault();
-
-                // Bersihkan validasi error yang lama
                 $('.form-control').removeClass('is-invalid');
                 $('.invalid-feedback').text('');
-
-                // Loading state
                 $('#btnSpinner').removeClass('d-none');
                 $('#btnSaveUnit').prop('disabled', true);
-                $('#btnText').text('Menyimpan...');
-
+                
                 const unitId = $('#unitId').val();
                 const isEdit = unitId !== '';
                 const url = isEdit ? `/units/${unitId}` : '/units';
                 const method = isEdit ? 'PUT' : 'POST';
-
-                // Serialize form data
                 let formData = $(this).serializeArray();
-
-                // Handle checkbox value (since serializeArray won't include unchecked boxes)
-                const isActiveIndex = formData.findIndex(item => item.name === 'is_active');
-                if (isActiveIndex === -1) {
+                if (formData.findIndex(item => item.name === 'is_active') === -1) {
                     formData.push({ name: 'is_active', value: '0' });
                 }
 
@@ -465,103 +252,30 @@
                     type: method,
                     data: $.param(formData),
                     success: function(response) {
-                        // Reset loading
                         $('#btnSpinner').addClass('d-none');
                         $('#btnSaveUnit').prop('disabled', false);
-
                         if (response.success) {
-                            // Sembunyikan Modal
                             $('#unitModal').modal('hide');
-
-                            // Tampilkan SweetAlert Toast Sukses
-                            Toast.fire({
-                                ...getSwalConfig(),
-                                icon: 'success',
-                                title: response.message
-                            });
-
-                            // Reload Datatable (tetap di halaman aktif)
+                            Toast.fire({...getSwalConfig(), icon: 'success', title: response.message});
                             table.ajax.reload(null, false);
-
-                            // Perbarui statistik secara asinkron (kalkulasi ulang client-side sederhana)
-                            updateStatsWidget(isEdit, formData);
                         }
                     },
                     error: function(xhr) {
-                        // Reset loading
                         $('#btnSpinner').addClass('d-none');
                         $('#btnSaveUnit').prop('disabled', false);
-                        $('#btnText').text(isEdit ? 'Simpan Perubahan' : 'Simpan Unit');
-
                         if (xhr.status === 422) {
-                            // Tampilkan validasi error dari Laravel
-                            const errors = xhr.responseJSON.errors;
-                            $.each(errors, function(key, messages) {
-                                const inputField = $(`[name="${key}"]`);
-                                inputField.addClass('is-invalid');
+                            $.each(xhr.responseJSON.errors, function(key, messages) {
+                                $(`[name="${key}"]`).addClass('is-invalid');
                                 $(`#error-${key}`).text(messages[0]);
                             });
-                        } else {
-                            // Error sistem lainnya
-                            Swal.fire({
-                                ...getSwalConfig(),
-                                icon: 'error',
-                                title: 'Gagal Menyimpan!',
-                                text: xhr.responseJSON.message || 'Terjadi kesalahan sistem internal.'
-                            });
                         }
                     }
                 });
             });
 
-            // 6. Ambil Data & Buka Modal Edit Unit
-            $(document).on('click', '.btn-edit', function() {
-                const id = $(this).data('id');
-
-                // Bersihkan validasi error yang lama
-                $('.form-control').removeClass('is-invalid');
-                $('.invalid-feedback').text('');
-
-                $.ajax({
-                    url: `/units/${id}`,
-                    type: 'GET',
-                    success: function(response) {
-                        if (response.success) {
-                            const unit = response.data;
-
-                            // Isi field form modal
-                            $('#unitId').val(unit.id);
-                            $('#formMethod').val('PUT');
-                            $('#unitCode').val(unit.code);
-                            $('#unitName').val(unit.name);
-                            $('#unitDescription').val(unit.description);
-
-                            // Set status switch
-                            $('#unitActive').prop('checked', unit.is_active).trigger('change');
-
-                            // Set parameter modal untuk Edit
-                            $('#unitModalTitle').text('Edit Detail Unit Kerja');
-                            $('#btnText').text('Simpan Perubahan');
-
-                            // Tampilkan Modal
-                            $('#unitModal').modal('show');
-                        }
-                    },
-                    error: function(xhr) {
-                        Swal.fire({
-                            ...getSwalConfig(),
-                            icon: 'error',
-                            title: 'Koneksi Gagal!',
-                            text: 'Gagal mengambil data unit untuk diedit.'
-                        });
-                    }
-                });
-            });
-
-            // 7. Hapus Unit Kerja (SweetAlert 2 Konfirmasi)
+            // Hapus Unit
             $(document).on('click', '.btn-delete', function() {
                 const id = $(this).data('id');
-
                 Swal.fire({
                     ...getSwalConfig(),
                     title: 'Apakah Anda Yakin?',
@@ -672,31 +386,10 @@
                             $(this).attr('data-count', targetVal);
 
                             // Re-animate the count number
-                            animateCountElement($(this)[0], parseInt(targetVal));
+                            window.animateCountElement($(this)[0], parseInt(targetVal));
                         });
                     }
                 });
-            }
-
-            // Re-usable counter number animator
-            function animateCountElement(el, target) {
-                const duration = 800;
-                const steps = 40;
-                const stepValue = target / steps;
-                let current = 0;
-                let step = 0;
-
-                clearInterval(el.timer);
-
-                el.timer = setInterval(() => {
-                    step++;
-                    current = stepValue * step;
-                    if (step >= steps) {
-                        current = target;
-                        clearInterval(el.timer);
-                    }
-                    el.textContent = Math.floor(current).toLocaleString();
-                }, duration / steps);
             }
         });
     </script>
