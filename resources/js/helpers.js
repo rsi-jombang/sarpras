@@ -76,3 +76,13 @@ if ($.fn.dataTable) {
         }
     });
 }
+
+// 5. Setup global AJAX CSRF Token for jQuery
+if (typeof $ !== 'undefined') {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+}
+

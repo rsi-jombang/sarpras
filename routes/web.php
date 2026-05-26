@@ -3,6 +3,7 @@
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UnitController;
+use App\Http\Controllers\ItemController;
 use App\Models\Unit;
 use Illuminate\Support\Facades\Route;
 
@@ -36,6 +37,18 @@ Route::middleware(['auth', 'role:admin,sarpras'])->group(function () {
         Route::put('/{category}', 'update')->name('update');
         Route::delete('/{category}', 'destroy')->name('destroy');
         Route::patch('/{category}/toggle', 'toggleStatus')->name('toggle');
+    });
+
+    Route::group(['prefix' => 'items', 'as' => 'items.', 'controller' => ItemController::class], function(){
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{item}', 'show')->name('show');
+        Route::get('/{item}/edit', 'edit')->name('edit');
+        Route::post('/{item}', 'update')->name('update'); // Use POST with _method=PUT for file uploads
+        Route::delete('/{item}', 'destroy')->name('destroy');
+        Route::patch('/{item}/toggle', 'toggleStatus')->name('toggle');
+        Route::get('/{item}/stocks', 'stocks')->name('stocks');
+        Route::patch('/{item}/minimum-stock', 'updateMinimumStock')->name('minimum-stock');
     });
 });
 

@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Item extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, LogsActivity;
 
     protected $fillable = [
         'category_id',
@@ -21,7 +23,21 @@ class Item extends Model
         'description',
         'image_path',
         'is_active',
+        'minimum_stock',
     ];
+
+    // -------------------------------------------------------------------------
+    // Activity Log
+    // -------------------------------------------------------------------------
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['minimum_stock'])
+            ->logOnlyDirty()
+            ->useLogName('stok_aman')
+            ->setDescriptionForEvent(fn(string $eventName) => "Stok aman barang \"" . $this->name . "\" telah diperbarui");
+    }
 
     protected $casts = [
         'item_type' => ItemType::class,
