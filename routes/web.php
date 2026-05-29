@@ -50,6 +50,35 @@ Route::middleware(['auth', 'role:admin,sarpras'])->group(function () {
         Route::get('/{item}/stocks', 'stocks')->name('stocks');
         Route::patch('/{item}/minimum-stock', 'updateMinimumStock')->name('minimum-stock');
     });
+
+    Route::group(['prefix' => 'purchase-orders', 'as' => 'purchase-orders.', 'controller' => App\Http\Controllers\PurchaseOrderController::class], function(){
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{purchaseOrder}', 'show')->name('show');
+        Route::get('/trash', 'trash')->name('trash');
+        Route::get('/{purchaseOrder}/edit', 'edit')->name('edit');
+        Route::post('/{purchaseOrder}', 'update')->name('update'); // Use POST with _method=PUT for file uploads
+        Route::delete('/{purchaseOrder}', 'destroy')->name('destroy');
+        // Route::patch('/{purchaseOrder}/toggle', 'toggleStatus')->name('toggle');
+    });
+
+    Route::group(['prefix' => 'api/purchase-orders', 'as' => 'api.purchase-orders.', 'controller' => App\Http\Controllers\Api\PurchaseOrderApiController::class], function(){
+        // DataTables & stats
+        Route::get('/','index')->name('index');
+        Route::get('/stats','stats')->name('stats');
+        Route::get('/items','items')->name('items');
+
+        // CRUD
+        Route::post('/', 'store')->name('store');
+        Route::get('/{purchaseOrder}','show')->name('show');
+        Route::put('/{purchaseOrder}', 'update')->name('update');
+
+        // Aksi status
+        Route::post('/{purchaseOrder}/approve', 'approve')->name('approve');
+        Route::post('/{purchaseOrder}/receive', 'receive')->name('receive');
+        Route::post('/{purchaseOrder}/cancel', 'cancel')->name('cancel');
+    });
 });
 
 require __DIR__.'/auth.php';

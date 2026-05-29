@@ -9,6 +9,10 @@ use App\Models\User;
 use App\Policies\CategoryPolicy;
 use App\Policies\RequestPolicy;
 use App\Policies\UnitPolicy;
+use App\Services\ItemService;
+use App\Services\NumberGeneratorService;
+use App\Services\PurchaseOrderService;
+use App\Services\StockService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -19,7 +23,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+         // Services tanpa dependency — singleton agar tidak di-instantiate ulang
+        $this->app->singleton(NumberGeneratorService::class);
+        $this->app->singleton(StockService::class);
+
+        // Services dengan dependency — Laravel auto-resolve via constructor injection
+        // $this->app->singleton(RequestService::class);
+        $this->app->singleton(PurchaseOrderService::class);
+        // $this->app->singleton(StockOpnameService::class);
+        $this->app->singleton(ItemService::class);
     }
 
     /**

@@ -83,6 +83,18 @@
         </li>
 
         <li>
+            <div class="sidebar-label">Transaksi</div>
+        </li>
+
+        <li class="nav-item">
+            <a href="{{ route('purchase-orders.index') }}"
+                class="nav-link {{ request()->routeIs('purchase-orders*') ? 'active' : '' }}">
+                <i class="bi bi-cart-fill nav-icon"></i>
+                <span class="nav-label">Purchase Order</span>
+            </a>
+        </li>
+
+        <li>
             <div class="sidebar-label">System</div>
         </li>
 
