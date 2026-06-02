@@ -39,16 +39,37 @@ Route::middleware(['auth', 'role:admin,sarpras'])->group(function () {
         Route::patch('/{category}/toggle', 'toggleStatus')->name('toggle');
     });
 
+    // Route Items biasa
     Route::group(['prefix' => 'items', 'as' => 'items.', 'controller' => ItemController::class], function(){
-        Route::get('/', 'index')->name('index');
-        Route::post('/', 'store')->name('store');
-        Route::get('/{item}', 'show')->name('show');
-        Route::get('/{item}/edit', 'edit')->name('edit');
-        Route::post('/{item}', 'update')->name('update'); // Use POST with _method=PUT for file uploads
-        Route::delete('/{item}', 'destroy')->name('destroy');
-        Route::patch('/{item}/toggle', 'toggleStatus')->name('toggle');
-        Route::get('/{item}/stocks', 'stocks')->name('stocks');
-        Route::patch('/{item}/minimum-stock', 'updateMinimumStock')->name('minimum-stock');
+        Route::get('/','index')->name('index');
+        Route::get('/trash','trash')->name('trash');
+        Route::get('/create','create')->name('create');
+        Route::post('/','store')->name('store');
+        Route::get('/{item}','show')->name('show');
+        Route::get('/{item}/edit','edit')->name('edit');
+        Route::post('/{item}','update')->name('update');
+        Route::delete('/{item}','destroy')->name('destroy');
+    });
+
+    // Route Items Api
+    Route::group(['prefix' => 'api/items', 'as' => 'api.items.', 'controller' => App\Http\Controllers\Api\ItemApiController::class], function(){
+        // DataTables & helpers
+        Route::get('/','index')->name('index');
+        Route::get('/stats','stats')->name('stats');
+        Route::get('/categories','categories')->name('categories');
+        // Trash
+        Route::get('/trash','trash')->name('trash');
+        // CRUD
+        Route::post('/','store')->name('store');
+        Route::get('/{item}','show')->name('show');
+        Route::post('/{item}','update')->name('update'); // POST karena ada file upload
+        Route::delete('/{item}','destroy')->name('destroy');
+        // Stok & pergerakan per item
+        Route::get('/{item}/stocks','stocks')->name('stocks');
+        Route::get('/{item}/movements','movements')->name('movements');
+        // Trash actions
+        Route::post('/{id}/restore','restore')->name('restore');
+        Route::delete('/{id}/force-delete','forceDelete')->name('force-delete');
     });
 
     Route::group(['prefix' => 'purchase-orders', 'as' => 'purchase-orders.', 'controller' => App\Http\Controllers\PurchaseOrderController::class], function(){
