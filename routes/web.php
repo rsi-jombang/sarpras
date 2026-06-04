@@ -4,6 +4,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\ItemController;
+use App\Models\Request;
 use App\Models\Unit;
 use Illuminate\Support\Facades\Route;
 
@@ -21,7 +22,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::middleware(['auth', 'role:admin,sarpras'])->group(function () {
+// Route::middleware(['auth', 'role:admin,sarpras'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/units', [UnitController::class, 'index'])->name('units.index')->can('viewAny', Unit::class);
     Route::post('/units', [UnitController::class, 'store'])->name('units.store')->can('create', Unit::class);
     Route::get('/units/{unit}', [UnitController::class, 'show'])->name('units.show')->can('view', Unit::class);
@@ -99,6 +101,33 @@ Route::middleware(['auth', 'role:admin,sarpras'])->group(function () {
         Route::post('/{purchaseOrder}/approve', 'approve')->name('approve');
         Route::post('/{purchaseOrder}/receive', 'receive')->name('receive');
         Route::post('/{purchaseOrder}/cancel', 'cancel')->name('cancel');
+    });
+
+    // Route Biasah
+    Route::group(['prefix' => 'requests', 'as' => 'requests.', 'controller' => App\Http\Controllers\RequestController::class], function(){
+        Route::get('/', 'index')->name('index')->can('viewAny', Request::class);
+        Route::get('/create', 'create')->name('create')->can('create', Request::class);
+        Route::post('/', 'store')->name('store')->can('create', Request::class);
+        Route::get('/{request}', 'show')->name('show')->can('view', 'request');
+        Route::get('/{request}/review', 'reviewForm')->name('review.form')->can('review', 'request');
+
+        Route::post('/{request}/review', 'review')->name('review')->can('review', 'request');
+        Route::post('/{request}/fulfill', 'fulfill')->name('fulfill')->can('fulfill', 'request');
+        Route::post('/{request}/complete', 'complete')->name('complete')->can('complete', 'request');
+        Route::post('/{request}/cancel', 'cancel')->name('cancel')->can('cancel', 'request');
+    });
+
+    // Route API Request Item
+    Route::group(['prefix' => 'api/requests', 'as' => 'api.requests.', 'controller' => App\Http\Controllers\Api\RequestApiController::class], function(){
+        Route::get('/','index')->name('index');
+        Route::get('/stats','stats')->name('stats');
+        Route::get('/items','items')->name('items');
+        Route::get('/units','units')->name('units');
+
+        // Aksi status via AJAX
+        Route::post('/{request}/fulfill','fulfill')->name('fulfill');
+        Route::post('/{request}/complete','complete')->name('complete');
+        Route::post('/{request}/cancel','cancel')->name('cancel');
     });
 });
 

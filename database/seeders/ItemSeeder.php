@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\Item;
+use App\Models\ItemStock;
 use Illuminate\Database\Seeder;
 
 class ItemSeeder extends Seeder
@@ -232,7 +233,7 @@ class ItemSeeder extends Seeder
             $category = $cats->get($item['category']);
             if (!$category) continue;
 
-            Item::firstOrCreate(
+            $item = Item::firstOrCreate(
                 ['code' => $item['code']],
                 [
                     'category_id'    => $category->id,
@@ -243,6 +244,17 @@ class ItemSeeder extends Seeder
                     'is_active'      => true,
                 ]
             );
+
+            ItemStock::create([
+                'item_id' => $item->id,
+                'purchase_price' => rand(10000, 1000000),
+                'selling_price' => rand(10000, 1000000),
+                'quantity' => rand(50, 100),
+                'minimum_stock' => rand(5, 10),
+                'batch_number' => 'BATCH-001',
+                'expired_date' => now()->addYear(),
+                'notes' => 'Initial stock',
+            ]);
         }
     }
 }

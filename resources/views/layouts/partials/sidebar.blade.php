@@ -94,6 +94,14 @@
             </a>
         </li>
 
+        <li class="nav-item">
+            <a href="{{ route('requests.index') }}"
+                class="nav-link {{ request()->routeIs('requests*') ? 'active' : '' }}">
+                <i class="bi bi-clipboard-data-fill nav-icon"></i>
+                <span class="nav-label">Permintaan Barang</span>
+            </a>
+        </li>
+
         <li>
             <div class="sidebar-label">System</div>
         </li>
