@@ -1,13 +1,13 @@
 @extends('layouts.auth')
 
-@section('title', 'Create Account')
+@section('title', 'Daftar Akun')
 
 @section('content')
 
     {{-- Header --}}
     <div class="auth-card-header">
-        <h1 class="auth-title">Create account</h1>
-        <p class="auth-subtitle">Join Nexus Admin — it's free to get started</p>
+        <h1 class="auth-title">Buat Akun Baru</h1>
+        <p class="auth-subtitle">Daftarkan diri Anda untuk mengakses Sistem SARPRAS</p>
     </div>
 
     {{-- Form --}}
@@ -16,11 +16,11 @@
 
         {{-- Name --}}
         <div class="auth-field">
-            <label for="name" class="auth-label">Full Name</label>
+            <label for="name" class="auth-label">Nama Lengkap</label>
             <div class="auth-input-wrap">
                 <i class="bi bi-person auth-input-icon"></i>
                 <input type="text" id="name" name="name" class="auth-input @error('name') is-invalid @enderror"
-                    placeholder="Alex Carter" value="{{ old('name') }}" required autofocus autocomplete="name" />
+                    placeholder="Masukkan nama lengkap" value="{{ old('name') }}" required autofocus autocomplete="name" />
                 @error('name')
                     <div class="auth-error">
                         <i class="bi bi-exclamation-circle-fill"></i>
@@ -32,11 +32,11 @@
 
         {{-- Email --}}
         <div class="auth-field">
-            <label for="email" class="auth-label">Email Address</label>
+            <label for="email" class="auth-label">Alamat Email</label>
             <div class="auth-input-wrap">
                 <i class="bi bi-envelope auth-input-icon"></i>
                 <input type="email" id="email" name="email" class="auth-input @error('email') is-invalid @enderror"
-                    placeholder="you@company.com" value="{{ old('email') }}" required autocomplete="username" />
+                    placeholder="nama@rsi-jombang.com" value="{{ old('email') }}" required autocomplete="username" />
                 @error('email')
                     <div class="auth-error">
                         <i class="bi bi-exclamation-circle-fill"></i>
@@ -48,11 +48,11 @@
 
         {{-- Password --}}
         <div class="auth-field">
-            <label for="password" class="auth-label">Password</label>
+            <label for="password" class="auth-label">Kata Sandi</label>
             <div class="auth-input-wrap">
                 <i class="bi bi-lock auth-input-icon"></i>
                 <input type="password" id="password" name="password"
-                    class="auth-input @error('password') is-invalid @enderror" placeholder="Min. 8 characters" required
+                    class="auth-input @error('password') is-invalid @enderror" placeholder="Minimal 8 karakter" required
                     autocomplete="new-password" />
                 <button type="button" class="auth-input-toggle" id="togglePassword" aria-label="Toggle password">
                     <i class="bi bi-eye" id="togglePasswordIcon"></i>
@@ -78,24 +78,11 @@
 
         {{-- Confirm Password --}}
         <div class="auth-field">
-            <label for="password_confirmation" class="auth-label">Confirm Password</label>
+            <label for="password_confirmation" class="auth-label">Konfirmasi Kata Sandi</label>
             <div class="auth-input-wrap">
                 <i class="bi bi-lock-fill auth-input-icon"></i>
                 <input type="password" id="password_confirmation" name="password_confirmation" class="auth-input"
-                    placeholder="Re-enter your password" required autocomplete="new-password" />
-            </div>
-        </div>
-
-        {{-- Terms --}}
-        <div class="mb-4">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="terms" name="terms" required />
-                <label class="form-check-label auth-check-label" for="terms">
-                    I agree to the
-                    <a href="#" class="auth-link">Terms of Service</a>
-                    and
-                    <a href="#" class="auth-link">Privacy Policy</a>
-                </label>
+                    placeholder="Masukkan ulang kata sandi" required autocomplete="new-password" />
             </div>
         </div>
 
@@ -103,11 +90,11 @@
         <button type="submit" class="auth-btn" id="registerBtn">
             <span class="auth-btn-text">
                 <i class="bi bi-person-check-fill"></i>
-                Create Account
+                Daftar Akun
             </span>
             <span class="auth-btn-loading d-none">
                 <span class="auth-spinner"></span>
-                Creating account…
+                Memproses…
             </span>
         </button>
 
@@ -115,9 +102,9 @@
 
     {{-- Login link --}}
     <p class="auth-switch-text">
-        Already have an account?
+        Sudah punya akun?
         <a href="{{ route('login') }}" class="auth-link fw-semibold">
-            Sign in →
+            Masuk di sini →
         </a>
     </p>
 
@@ -152,22 +139,11 @@
             if (/[0-9]/.test(val)) score++;
             if (/[^A-Za-z0-9]/.test(val)) score++;
 
-            const levels = [{
-                    color: '#ef4444',
-                    text: 'Weak'
-                },
-                {
-                    color: '#f59e0b',
-                    text: 'Fair'
-                },
-                {
-                    color: '#3b82f6',
-                    text: 'Good'
-                },
-                {
-                    color: '#22c55e',
-                    text: 'Strong'
-                },
+            const levels = [
+                { color: '#ef4444', text: 'Lemah' },
+                { color: '#f59e0b', text: 'Cukup' },
+                { color: '#3b82f6', text: 'Baik' },
+                { color: '#22c55e', text: 'Kuat' },
             ];
 
             bars.forEach((bar, i) => {

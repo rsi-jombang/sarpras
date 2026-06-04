@@ -12,9 +12,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -30,6 +30,22 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/units/{unit}', [UnitController::class, 'update'])->name('units.update')->can('update', Unit::class);
     Route::delete('/units/{unit}', [UnitController::class, 'destroy'])->name('units.destroy')->can('delete', Unit::class);
     Route::patch('/units/{unit}/toggle', [UnitController::class, 'toggleStatus'])->name('units.toggle')->can('update', Unit::class);
+
+    Route::group(['prefix' => 'api/dashboard', 'as' => 'api.dashboard.', 'controller' => App\Http\Controllers\Api\DashboardApiController::class], function () {
+         // Unit
+        Route::get('/unit/stats','unitStats')->name('unit.stats');
+        Route::get('/unit/charts','unitCharts')->name('unit.charts');
+        Route::get('/unit/recent-requests','unitRecentRequests')->name('unit.recent');
+
+        // Sarpras
+        Route::get('/sarpras/stats','sarprasStats')->name('sarpras.stats');
+        Route::get('/sarpras/charts','sarprasCharts')->name('sarpras.charts');
+        Route::get('/sarpras/activity','sarprasActivity')->name('sarpras.activity');
+
+        // Admin
+        Route::get('/admin/stats','adminStats')->name('admin.stats');
+        Route::get('/admin/charts','adminCharts')->name('admin.charts');
+    });
 
     Route::group(['prefix' => 'category', 'as' => 'category.', 'controller' => CategoryController::class], function(){
         Route::get('/', 'index')->name('index');
