@@ -48,10 +48,23 @@ class StockOpnameItem extends Model
     // Mutator: otomatis hitung difference saat physical_quantity diisi
     // -------------------------------------------------------------------------
 
-    public function setPhysicalQuantityAttribute(int $value): void
+    // public function setPhysicalQuantityAttribute(int $value): void
+    // {
+    //     $this->attributes['physical_quantity'] = $value;
+    //     $this->attributes['difference']        = $value - ($this->system_quantity ?? 0);
+    // }
+
+    public function setPhysicalQuantityAttribute(?int $value): void
     {
         $this->attributes['physical_quantity'] = $value;
-        $this->attributes['difference']        = $value - ($this->system_quantity ?? 0);
+
+        // Hanya hitung jika physical_quantity diisi
+        if ($value !== null) {
+            $this->attributes['difference'] = $value - ($this->system_quantity ?? 0);
+        } else {
+            // Jika null, set difference juga null
+            $this->attributes['difference'] = null;
+        }
     }
 
     // -------------------------------------------------------------------------

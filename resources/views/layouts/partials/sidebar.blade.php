@@ -102,6 +102,14 @@
             </a>
         </li>
 
+        <div class="nav-item">
+            <a href="{{ route('stock-opname.index') }}"
+                class="nav-link {{ request()->routeIs('stock-opname*') ? 'active' : '' }}">
+                <i class="bi bi-clipboard-data-fill nav-icon"></i>
+                <span class="nav-label">Stock Opname</span>
+            </a>
+        </div>
+
         <li>
             <div class="sidebar-label">System</div>
         </li>

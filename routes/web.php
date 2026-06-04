@@ -129,6 +129,26 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{request}/complete','complete')->name('complete');
         Route::post('/{request}/cancel','cancel')->name('cancel');
     });
+
+    // Route Stock Opname
+    Route::group(['prefix' => 'stock-opname', 'as' => 'stock-opname.', 'controller' => App\Http\Controllers\StockOpnameController::class, 'middleware' => 'can:viewAny,App\Models\StockOpname'], function(){
+        Route::get('/','index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/','store')->name('store');
+        Route::get('/{stockOpname}','show')->name('show');
+        Route::post('/{stockOpname}/items','updateItems')->name('update-items');
+        Route::get('/{stockOpname}/close','closeConfirm')->name('close.confirm');
+        Route::post('/{stockOpname}/close','close')->name('close');
+    });
+
+    // Route Stock Opname Api
+    Route::group(['prefix' => 'api/stock-opname', 'as' => 'api.stock-opname.', 'controller' => App\Http\Controllers\Api\StockOpnameApiController::class], function(){
+        Route::get('/','index')->name('index');
+        Route::get('/history', 'history')->name('history');
+        Route::get('/stats', 'stats')->name('stats');
+        Route::get('/{stockOpname}/items', 'items')->name('items');
+        Route::delete('/{stockOpname}', 'destroy')->name('destroy');
+    });
 });
 
 require __DIR__.'/auth.php';

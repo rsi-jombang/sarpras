@@ -1,0 +1,201 @@
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
+
+    const OPNAME_ID = {{ $stockOpname->id }};
+    const IS_OPEN   = {{ $stockOpname->isOpen() ? 'true' : 'false' }};
+    const API       = '/api/stock-opname';
+
+    // =========================================================================
+    // DataTables — item opname (server-side)
+    // =========================================================================
+    const columns = [
+        { data: 'DT_RowIndex',           name: 'DT_RowIndex',        orderable: false, searchable: false, className: 'text-center' },
+        { data: 'item_display',          name: 'item_id' },
+        { data: 'uom_display',           name: 'unit_of_measure',    orderable: false, className: 'text-center' },
+        { data: 'batch_display',         name: 'batch',              orderable: false },
+        { data: 'system_qty_display',    name: 'system_quantity',    className: 'text-center' },
+        { data: 'physical_qty_display',  name: 'physical_quantity',  orderable: false, className: 'text-center' },
+        { data: 'difference_display',    name: 'difference',         orderable: false, className: 'text-center' },
+    ];
+
+    const table = $('#opnameItemsTable').DataTable({
+        processing:  true,
+        serverSide:  true,
+        ajax: {
+            url: `${API}/${OPNAME_ID}/items`,
+            data: d => {
+                d.filter_status = $('#filterCountStatus').val();
+            },
+        },
+        columns,
+        order: [[1, 'asc']],
+        paging: !IS_OPEN,
+        scrollY: IS_OPEN ? '60vh' : undefined,
+        scrollCollapse: IS_OPEN,
+        pageLength: IS_OPEN ? -1 : 50,
+        language: { url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/id.json' },
+        drawCallback: function () {
+            if (IS_OPEN) renderInputRows();
+        },
+    });
+
+    $('#filterCountStatus').on('change', () => table.draw());
+    $('#itemSearch').on('keyup', function () { table.search($(this).val()).draw(); });
+
+    // =========================================================================
+    // Render input row di atas setiap row DataTables (hanya jika open)
+    // Karena input fisik menggunakan form redirect, kita render input
+    // langsung di kolom "Fisik" dengan mengganti konten cell setelah draw.
+    // =========================================================================
+    function renderInputRows() {
+        // Ambil semua row dari DataTables dan tambahkan input di kolom fisik
+        table.rows().every(function () {
+            const data   = this.data();
+            const $row   = $(this.node());
+            const $cell  = $row.find('td:eq(5)'); // kolom physical_qty
+
+            // Skip jika sudah ada input
+            if ($cell.find('input[type=number]').length) return;
+
+            const opnameItemId = data.DT_RowData?.opname_item_id ?? null;
+            if (!opnameItemId) return;
+
+            const currentVal = data.physical_quantity ?? '';
+
+            $cell.html(`
+                <div class="d-flex align-items-center justify-content-center gap-1">
+                    <input type="number"
+                           class="form-control form-control-sm text-center physical-input"
+                           name="items[${opnameItemId}][physical_quantity]"
+                           data-id="${opnameItemId}"
+                           value="${currentVal}"
+                           min="0"
+                           style="width:70px;font-size:13px"
+                           placeholder="—">
+                </div>
+            `);
+        });
+
+        updateSelectedCount();
+    }
+
+    // =========================================================================
+    // Karena DataTables server-side tidak expose row data dengan mudah,
+    // kita gunakan pendekatan berbeda: fetch semua item sekali, render
+    // form secara manual (non-DataTables) untuk mode open.
+    // =========================================================================
+    @if($stockOpname->isOpen())
+    // Fetch semua item tanpa pagination untuk form input
+    let allItems = [];
+
+    function loadAllItemsForForm() {
+        $.get(`${API}/${OPNAME_ID}/items`, {
+            length: -1, // tidak semua server DataTables support ini
+            draw: 1,
+            start: 0,
+            length: 99999,
+            filter_status: $('#filterCountStatus').val(),
+            search: { value: $('#itemSearch').val() }
+        }, res => {
+            if (!res.data) return;
+            allItems = res.data;
+            renderFormRows(allItems);
+        });
+    }
+
+    function renderFormRows(items) {
+        const $tbody = $('#opnameItemsBody');
+        $tbody.empty();
+
+        if (items.length === 0) {
+            $('#emptyOpnameMsg').removeClass('d-none');
+            $('#btnSaveItems').prop('disabled', true);
+            return;
+        }
+        $('#emptyOpnameMsg').addClass('d-none');
+
+        items.forEach((item, i) => {
+            const diffHtml = item.difference_display ?? '<span class="text-muted">—</span>';
+            $tbody.append(`
+                <tr class="item-form-row" data-id="${item.DT_RowIndex ?? i}">
+                    <td class="text-center text-muted" style="font-size:12px">${i + 1}</td>
+                    <td>${item.item_display}</td>
+                    <td class="text-center text-muted">${item.uom_display}</td>
+                    <td class="text-muted">${item.batch_display}</td>
+                    <td class="text-center">${item.system_qty_display}</td>
+                    <td class="text-center">
+                        <input type="number"
+                               class="form-control form-control-sm text-center physical-input"
+                               name="items[${i}][physical_quantity]"
+                               data-system="${item.system_quantity ?? 0}"
+                               value="${item.physical_quantity ?? ''}"
+                               min="0"
+                               placeholder="—"
+                               style="width:75px;font-size:13px;margin:0 auto">
+                        <input type="hidden" name="items[${i}][opname_item_id]" value="${item.opname_item_id}">
+                    </td>
+                    <td class="text-center diff-cell">${diffHtml}</td>
+                </tr>
+            `);
+        });
+
+        updateSelectedCount();
+    }
+
+    // Hitung & tampilkan selisih secara realtime saat input berubah
+    $(document).on('input', '.physical-input', function () {
+        const $row   = $(this).closest('tr');
+        const system = parseInt($(this).data('system')) || 0;
+        const phys   = $(this).val();
+        const $diff  = $row.find('.diff-cell');
+
+        if (phys === '' || phys === null) {
+            $diff.html('<span class="text-muted">—</span>');
+        } else {
+            const diff  = parseInt(phys) - system;
+            const sign  = diff > 0 ? '+' : '';
+            const color = diff === 0 ? 'success' : (diff > 0 ? 'info' : 'danger');
+            $diff.html(`<span class="fw-bold text-${color}">${sign}${diff}</span>`);
+        }
+
+        updateSelectedCount();
+    });
+
+    function updateSelectedCount() {
+        const filled = $('.physical-input').filter(function () {
+            return $(this).val() !== '' && $(this).val() !== null;
+        }).length;
+        const total  = $('.physical-input').length;
+        $('#selectedCount').text(`${filled} dari ${total} item sudah diisi`);
+        $('#btnSaveItems').prop('disabled', filled === 0);
+    }
+
+    // Filter & search re-render form rows
+    $('#filterCountStatus, #itemSearch').on('change keyup', function () {
+        clearTimeout(window._searchTimer);
+        window._searchTimer = setTimeout(loadAllItemsForForm, 300);
+    });
+
+    // Submit form
+    $('#opnameForm').on('submit', function () {
+        $('#btnSaveSpinner').removeClass('d-none');
+        $('#btnSaveItems').prop('disabled', true);
+
+        // Hapus input kosong agar tidak terkirim (server tidak wajib semua terisi)
+        $(this).find('.physical-input').each(function () {
+            if ($(this).val() === '') $(this).prop('disabled', true);
+        });
+    });
+
+    // Init
+    loadAllItemsForForm();
+
+    @else
+    // Mode read-only — gunakan DataTables biasa
+    // (sudah diinisialisasi di atas, tidak perlu apa-apa lagi)
+    @endif
+
+});
+</script>
