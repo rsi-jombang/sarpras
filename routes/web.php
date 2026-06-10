@@ -32,22 +32,22 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/units/{unit}/toggle', [UnitController::class, 'toggleStatus'])->name('units.toggle')->can('update', Unit::class);
 
     Route::group(['prefix' => 'api/dashboard', 'as' => 'api.dashboard.', 'controller' => App\Http\Controllers\Api\DashboardApiController::class], function () {
-         // Unit
-        Route::get('/unit/stats','unitStats')->name('unit.stats');
-        Route::get('/unit/charts','unitCharts')->name('unit.charts');
-        Route::get('/unit/recent-requests','unitRecentRequests')->name('unit.recent');
+        // Unit
+        Route::get('/unit/stats', 'unitStats')->name('unit.stats');
+        Route::get('/unit/charts', 'unitCharts')->name('unit.charts');
+        Route::get('/unit/recent-requests', 'unitRecentRequests')->name('unit.recent');
 
         // Sarpras
-        Route::get('/sarpras/stats','sarprasStats')->name('sarpras.stats');
-        Route::get('/sarpras/charts','sarprasCharts')->name('sarpras.charts');
-        Route::get('/sarpras/activity','sarprasActivity')->name('sarpras.activity');
+        Route::get('/sarpras/stats', 'sarprasStats')->name('sarpras.stats');
+        Route::get('/sarpras/charts', 'sarprasCharts')->name('sarpras.charts');
+        Route::get('/sarpras/activity', 'sarprasActivity')->name('sarpras.activity');
 
         // Admin
-        Route::get('/admin/stats','adminStats')->name('admin.stats');
-        Route::get('/admin/charts','adminCharts')->name('admin.charts');
+        Route::get('/admin/stats', 'adminStats')->name('admin.stats');
+        Route::get('/admin/charts', 'adminCharts')->name('admin.charts');
     });
 
-    Route::group(['prefix' => 'category', 'as' => 'category.', 'controller' => CategoryController::class], function(){
+    Route::group(['prefix' => 'category', 'as' => 'category.', 'controller' => CategoryController::class], function () {
         Route::get('/', 'index')->name('index');
         Route::get('/create', 'create')->name('create');
         Route::post('/', 'store')->name('store');
@@ -58,39 +58,39 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Route Items biasa
-    Route::group(['prefix' => 'items', 'as' => 'items.', 'controller' => ItemController::class], function(){
-        Route::get('/','index')->name('index');
-        Route::get('/trash','trash')->name('trash');
-        Route::get('/create','create')->name('create');
-        Route::post('/','store')->name('store');
-        Route::get('/{item}','show')->name('show');
-        Route::get('/{item}/edit','edit')->name('edit');
-        Route::post('/{item}','update')->name('update');
-        Route::delete('/{item}','destroy')->name('destroy');
+    Route::group(['prefix' => 'items', 'as' => 'items.', 'controller' => ItemController::class], function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/trash', 'trash')->name('trash');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{item}', 'show')->name('show');
+        Route::get('/{item}/edit', 'edit')->name('edit');
+        Route::post('/{item}', 'update')->name('update');
+        Route::delete('/{item}', 'destroy')->name('destroy');
     });
 
     // Route Items Api
-    Route::group(['prefix' => 'api/items', 'as' => 'api.items.', 'controller' => App\Http\Controllers\Api\ItemApiController::class], function(){
+    Route::group(['prefix' => 'api/items', 'as' => 'api.items.', 'controller' => App\Http\Controllers\Api\ItemApiController::class], function () {
         // DataTables & helpers
-        Route::get('/','index')->name('index');
-        Route::get('/stats','stats')->name('stats');
-        Route::get('/categories','categories')->name('categories');
+        Route::get('/', 'index')->name('index');
+        Route::get('/stats', 'stats')->name('stats');
+        Route::get('/categories', 'categories')->name('categories');
         // Trash
-        Route::get('/trash','trash')->name('trash');
+        Route::get('/trash', 'trash')->name('trash');
         // CRUD
-        Route::post('/','store')->name('store');
-        Route::get('/{item}','show')->name('show');
-        Route::post('/{item}','update')->name('update'); // POST karena ada file upload
-        Route::delete('/{item}','destroy')->name('destroy');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{item}', 'show')->name('show');
+        Route::post('/{item}', 'update')->name('update'); // POST karena ada file upload
+        Route::delete('/{item}', 'destroy')->name('destroy');
         // Stok & pergerakan per item
-        Route::get('/{item}/stocks','stocks')->name('stocks');
-        Route::get('/{item}/movements','movements')->name('movements');
+        Route::get('/{item}/stocks', 'stocks')->name('stocks');
+        Route::get('/{item}/movements', 'movements')->name('movements');
         // Trash actions
-        Route::post('/{id}/restore','restore')->name('restore');
-        Route::delete('/{id}/force-delete','forceDelete')->name('force-delete');
+        Route::post('/{id}/restore', 'restore')->name('restore');
+        Route::delete('/{id}/force-delete', 'forceDelete')->name('force-delete');
     });
 
-    Route::group(['prefix' => 'purchase-orders', 'as' => 'purchase-orders.', 'controller' => App\Http\Controllers\PurchaseOrderController::class], function(){
+    Route::group(['prefix' => 'purchase-orders', 'as' => 'purchase-orders.', 'controller' => App\Http\Controllers\PurchaseOrderController::class], function () {
         Route::get('/', 'index')->name('index');
         Route::get('/create', 'create')->name('create');
         Route::post('/', 'store')->name('store');
@@ -102,15 +102,15 @@ Route::middleware(['auth'])->group(function () {
         // Route::patch('/{purchaseOrder}/toggle', 'toggleStatus')->name('toggle');
     });
 
-    Route::group(['prefix' => 'api/purchase-orders', 'as' => 'api.purchase-orders.', 'controller' => App\Http\Controllers\Api\PurchaseOrderApiController::class], function(){
+    Route::group(['prefix' => 'api/purchase-orders', 'as' => 'api.purchase-orders.', 'controller' => App\Http\Controllers\Api\PurchaseOrderApiController::class], function () {
         // DataTables & stats
-        Route::get('/','index')->name('index');
-        Route::get('/stats','stats')->name('stats');
-        Route::get('/items','items')->name('items');
+        Route::get('/', 'index')->name('index');
+        Route::get('/stats', 'stats')->name('stats');
+        Route::get('/items', 'items')->name('items');
 
         // CRUD
         Route::post('/', 'store')->name('store');
-        Route::get('/{purchaseOrder}','show')->name('show');
+        Route::get('/{purchaseOrder}', 'show')->name('show');
         Route::put('/{purchaseOrder}', 'update')->name('update');
 
         // Aksi status
@@ -120,7 +120,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Route Biasah
-    Route::group(['prefix' => 'requests', 'as' => 'requests.', 'controller' => App\Http\Controllers\RequestController::class], function(){
+    Route::group(['prefix' => 'requests', 'as' => 'requests.', 'controller' => App\Http\Controllers\RequestController::class], function () {
         Route::get('/', 'index')->name('index')->can('viewAny', Request::class);
         Route::get('/create', 'create')->name('create')->can('create', Request::class);
         Route::post('/', 'store')->name('store')->can('create', Request::class);
@@ -134,37 +134,63 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Route API Request Item
-    Route::group(['prefix' => 'api/requests', 'as' => 'api.requests.', 'controller' => App\Http\Controllers\Api\RequestApiController::class], function(){
-        Route::get('/','index')->name('index');
-        Route::get('/stats','stats')->name('stats');
-        Route::get('/items','items')->name('items');
-        Route::get('/units','units')->name('units');
+    Route::group(['prefix' => 'api/requests', 'as' => 'api.requests.', 'controller' => App\Http\Controllers\Api\RequestApiController::class], function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/stats', 'stats')->name('stats');
+        Route::get('/items', 'items')->name('items');
+        Route::get('/units', 'units')->name('units');
 
         // Aksi status via AJAX
-        Route::post('/{request}/fulfill','fulfill')->name('fulfill');
-        Route::post('/{request}/complete','complete')->name('complete');
-        Route::post('/{request}/cancel','cancel')->name('cancel');
+        Route::post('/{request}/fulfill', 'fulfill')->name('fulfill');
+        Route::post('/{request}/complete', 'complete')->name('complete');
+        Route::post('/{request}/cancel', 'cancel')->name('cancel');
     });
 
     // Route Stock Opname
-    Route::group(['prefix' => 'stock-opname', 'as' => 'stock-opname.', 'controller' => App\Http\Controllers\StockOpnameController::class, 'middleware' => 'can:viewAny,App\Models\StockOpname'], function(){
-        Route::get('/','index')->name('index');
+    Route::group(['prefix' => 'stock-opname', 'as' => 'stock-opname.', 'controller' => App\Http\Controllers\StockOpnameController::class, 'middleware' => 'can:viewAny,App\Models\StockOpname'], function () {
+        Route::get('/', 'index')->name('index');
         Route::get('/create', 'create')->name('create');
-        Route::post('/','store')->name('store');
-        Route::get('/{stockOpname}','show')->name('show');
-        Route::post('/{stockOpname}/items','updateItems')->name('update-items');
-        Route::get('/{stockOpname}/close','closeConfirm')->name('close.confirm');
-        Route::post('/{stockOpname}/close','close')->name('close');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{stockOpname}', 'show')->name('show');
+        Route::post('/{stockOpname}/items', 'updateItems')->name('update-items');
+        Route::get('/{stockOpname}/close', 'closeConfirm')->name('close.confirm');
+        Route::post('/{stockOpname}/close', 'close')->name('close');
     });
 
     // Route Stock Opname Api
-    Route::group(['prefix' => 'api/stock-opname', 'as' => 'api.stock-opname.', 'controller' => App\Http\Controllers\Api\StockOpnameApiController::class], function(){
-        Route::get('/','index')->name('index');
+    Route::group(['prefix' => 'api/stock-opname', 'as' => 'api.stock-opname.', 'controller' => App\Http\Controllers\Api\StockOpnameApiController::class], function () {
+        Route::get('/', 'index')->name('index');
         Route::get('/history', 'history')->name('history');
         Route::get('/stats', 'stats')->name('stats');
         Route::get('/{stockOpname}/items', 'items')->name('items');
         Route::delete('/{stockOpname}', 'destroy')->name('destroy');
     });
+
+    // Route Report
+    Route::group(['prefix' => 'reports', 'as' => 'reports.', 'controller' => App\Http\Controllers\ReportController::class], function () {
+        // Halaman utama laporan
+        Route::get('/', 'index')->name('index');
+
+        // Laporan Permintaan
+        Route::get('/requests', 'requestsPreview')->name('requests');
+        Route::get('/requests/pdf', 'requestsPdf')->name('requests.pdf');
+        Route::get('/requests/excel', 'requestsExcel')->name('requests.excel');
+
+        // Laporan Stok Barang
+        Route::get('/stocks', 'stocksPreview')->name('stocks');
+        Route::get('/stocks/pdf', 'stocksPdf')->name('stocks.pdf');
+        Route::get('/stocks/excel', 'stocksExcel')->name('stocks.excel');
+
+        // Laporan Purchase Order
+        Route::get('/purchase-orders', 'purchaseOrdersPreview')->name('purchase-orders');
+        Route::get('/purchase-orders/pdf', 'purchaseOrdersPdf')->name('purchase-orders.pdf');
+        Route::get('/purchase-orders/excel', 'purchaseOrdersExcel')->name('purchase-orders.excel');
+
+        // Laporan Stok Opname
+        Route::get('/opname', 'opnamePreview')->name('opname');
+        Route::get('/opname/pdf', 'opnamePdf')->name('opname.pdf');
+        Route::get('/opname/excel', 'opnameExcel')->name('opname.excel');
+    });
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

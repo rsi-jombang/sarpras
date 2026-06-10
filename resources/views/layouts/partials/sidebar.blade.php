@@ -75,8 +75,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="{{ route('items.index') }}"
-                class="nav-link {{ request()->routeIs('items*') ? 'active' : '' }}">
+            <a href="{{ route('items.index') }}" class="nav-link {{ request()->routeIs('items*') ? 'active' : '' }}">
                 <i class="bi bi-box-seam nav-icon"></i>
                 <span class="nav-label">Master Barang</span>
             </a>
@@ -109,6 +108,14 @@
                 <span class="nav-label">Stock Opname</span>
             </a>
         </div>
+
+        <li class="nav-item">
+            <a href="{{ route('reports.index') }}"
+                class="nav-link {{ request()->routeIs('reports*') ? 'active' : '' }}">
+                <i class="bi bi-file-earmark-bar-graph-fill nav-icon"></i>
+                <span class="nav-label">Laporan</span>
+            </a>
+        </li>
 
         <li>
             <div class="sidebar-label">System</div>
