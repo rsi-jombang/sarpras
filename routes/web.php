@@ -4,8 +4,10 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\UserController;
 use App\Models\Request;
 use App\Models\Unit;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -30,6 +32,13 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/units/{unit}', [UnitController::class, 'update'])->name('units.update')->can('update', Unit::class);
     Route::delete('/units/{unit}', [UnitController::class, 'destroy'])->name('units.destroy')->can('delete', Unit::class);
     Route::patch('/units/{unit}/toggle', [UnitController::class, 'toggleStatus'])->name('units.toggle')->can('update', Unit::class);
+
+    Route::get('/users', [UserController::class, 'index'])->name('users.index')->can('viewAny', User::class);
+    Route::post('/users', [UserController::class, 'store'])->name('users.store')->can('create', User::class);
+    Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show')->can('view', 'user');
+    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update')->can('update', 'user');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy')->can('delete', 'user');
+    Route::patch('/users/{user}/toggle', [UserController::class, 'toggleStatus'])->name('users.toggle')->can('update', User::class);
 
     Route::group(['prefix' => 'api/dashboard', 'as' => 'api.dashboard.', 'controller' => App\Http\Controllers\Api\DashboardApiController::class], function () {
         // Unit

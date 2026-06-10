@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Policies\CategoryPolicy;
 use App\Policies\RequestPolicy;
 use App\Policies\UnitPolicy;
+use App\Policies\UserPolicy;
 use App\Services\ItemService;
 use App\Services\NumberGeneratorService;
 use App\Services\PurchaseOrderService;
@@ -50,5 +51,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(RequestModel::class,  RequestPolicy::class);
         Gate::policy(Unit::class, UnitPolicy::class);
         Gate::policy(Category::class, CategoryPolicy::class);
+        Gate::policy(User::class, UserPolicy::class);
     }
 }

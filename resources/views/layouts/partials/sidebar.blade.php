@@ -24,41 +24,30 @@
             </a>
         </li>
 
+        @if(!auth()->user()->isUnit())
         <li class="nav-item">
             <a href="#" class="nav-link {{ request()->routeIs('analytics*') ? 'active' : '' }}">
                 <i class="bi bi-bar-chart-fill nav-icon"></i>
                 <span class="nav-label">Analytics</span>
             </a>
         </li>
+        @endif
 
+        {{-- Management — hidden for unit --}}
+        @if(!auth()->user()->isUnit())
         <li>
             <div class="sidebar-label">Management</div>
         </li>
 
-        {{-- Multi-level: Users --}}
+        {{-- Manajemen Pengguna (admin only) --}}
+        @can('viewAny', App\Models\User::class)
         <li class="nav-item">
-            <a href="#usersMenu" class="nav-link
-               {{ request()->routeIs('users*') ? 'active' : '' }}"
-                data-bs-toggle="collapse">
+            <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users*') ? 'active' : '' }}">
                 <i class="bi bi-people-fill nav-icon"></i>
-                <span class="nav-label">Users</span>
-                <i class="bi bi-chevron-right menu-arrow ms-auto"></i>
+                <span class="nav-label">Manajemen Pengguna</span>
             </a>
-            <div id="usersMenu" class="collapse {{ request()->routeIs('users*') ? 'show' : '' }}">
-                <ul class="sidebar-submenu">
-                    <li>
-                        <a href="#" class="nav-link {{ request()->routeIs('users.index') ? 'active' : '' }}">
-                            All Users
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="nav-link {{ request()->routeIs('users.create') ? 'active' : '' }}">
-                            Add User
-                        </a>
-                    </li>
-                </ul>
-            </div>
         </li>
+        @endcan
 
         {{-- Master Unit --}}
         <li class="nav-item">
@@ -92,7 +81,9 @@
                 <span class="nav-label">Purchase Order</span>
             </a>
         </li>
+        @endif
 
+        {{-- Permintaan Barang (semua role) --}}
         <li class="nav-item">
             <a href="{{ route('requests.index') }}"
                 class="nav-link {{ request()->routeIs('requests*') ? 'active' : '' }}">
@@ -101,6 +92,8 @@
             </a>
         </li>
 
+        {{-- Stock Opname & Laporan — hidden untuk unit --}}
+        @if(!auth()->user()->isUnit())
         <div class="nav-item">
             <a href="{{ route('stock-opname.index') }}"
                 class="nav-link {{ request()->routeIs('stock-opname*') ? 'active' : '' }}">
@@ -116,6 +109,7 @@
                 <span class="nav-label">Laporan</span>
             </a>
         </li>
+        @endif
 
         <li>
             <div class="sidebar-label">System</div>
