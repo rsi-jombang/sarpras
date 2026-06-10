@@ -85,7 +85,15 @@
                             <small class="text-muted" style="font-size:11.5px">Format: JPG, PNG, WebP. Maks. 2MB.</small>
                         </div>
 
-                        <div class="col-md-6 d-flex align-items-end">
+                        <div class="col-md-3" id="initialStockContainer">
+                            <label class="form-label" style="font-size:13px;font-weight:500">Stok Awal</label>
+                            <input type="number" class="form-control form-control-sm" id="initialStock" name="initial_stock"
+                                   value="0" min="0" style="font-size:13px">
+                            <small class="text-muted" style="font-size:11.5px">Isi jika ingin inisialisasi stok.</small>
+                            <div class="invalid-feedback" id="error-initial_stock"></div>
+                        </div>
+
+                        <div class="col-md-3 d-flex align-items-end">
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="itemActive" name="is_active" value="1" checked>
                                 <label class="form-check-label" for="itemActive" style="font-size:13px">Barang Aktif</label>

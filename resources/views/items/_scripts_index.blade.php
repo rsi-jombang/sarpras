@@ -135,6 +135,8 @@ document.addEventListener('DOMContentLoaded', function () {
         clearFormErrors();
         $('#itemModalTitle').text('Tambah Barang Baru');
         $('#btnItemText').text('Simpan');
+        $('#initialStock').val(0);
+        $('#initialStockContainer').show();
         loadCategories();
         $('#itemModal').modal('show');
     });
@@ -170,6 +172,7 @@ document.addEventListener('DOMContentLoaded', function () {
             clearFormErrors();
             $('#itemModalTitle').text('Edit Barang');
             $('#btnItemText').text('Perbarui');
+            $('#initialStockContainer').hide();
             $('#itemModal').modal('show');
         });
     });
