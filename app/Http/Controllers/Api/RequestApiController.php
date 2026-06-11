@@ -120,8 +120,8 @@ class RequestApiController extends Controller
                         style="border-radius:var(--radius-sm)"><i class="bi bi-x-lg"></i></button>';
                 }
 
-                // Unit: konfirmasi ambil jika ready
-                if ($user->isUnit() && $req->status->value === 'ready' && $req->unit_id === $user->unit_id) {
+                // Sarpras: konfirmasi ambil jika ready
+                if ($user->canApproveRequest() && $req->status->value === 'ready') {
                     $buttons .= '<button class="btn btn-sm btn-success btn-complete"
                         data-id="' . $req->id . '" title="Konfirmasi Pengambilan"
                         style="border-radius:var(--radius-sm)"><i class="bi bi-check-lg"></i></button>';

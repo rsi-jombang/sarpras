@@ -71,7 +71,8 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'name'        => ['required', 'string', 'max:255'],
-            'email'       => ['required', 'email', 'max:255', 'unique:users,email'],
+            'username'    => ['required', 'string', 'max:50', 'unique:users,username'],
+            'email'       => ['nullable', 'email', 'max:255', 'unique:users,email'],
             'password'    => ['required', 'string', 'min:8'],
             'employee_id' => ['nullable', 'string', 'max:50', 'unique:users,employee_id'],
             'phone'       => ['nullable', 'string', 'max:20'],
@@ -80,7 +81,8 @@ class UserController extends Controller
             'is_active'   => ['nullable', 'boolean'],
         ], [
             'name.required'       => 'Nama pengguna wajib diisi.',
-            'email.required'      => 'Email wajib diisi.',
+            'username.required'   => 'Username wajib diisi.',
+            'username.unique'     => 'Username ini sudah terdaftar.',
             'email.email'         => 'Format email tidak valid.',
             'email.unique'        => 'Email ini sudah terdaftar.',
             'password.required'   => 'Password wajib diisi.',
@@ -121,7 +123,8 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'name'        => ['required', 'string', 'max:255'],
-            'email'       => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'username'    => ['required', 'string', 'max:50', Rule::unique('users')->ignore($user->id)],
+            'email'       => ['nullable', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password'    => ['nullable', 'string', 'min:8'],
             'employee_id' => ['nullable', 'string', 'max:50', Rule::unique('users')->ignore($user->id)],
             'phone'       => ['nullable', 'string', 'max:20'],
@@ -130,7 +133,8 @@ class UserController extends Controller
             'is_active'   => ['nullable', 'boolean'],
         ], [
             'name.required'       => 'Nama pengguna wajib diisi.',
-            'email.required'      => 'Email wajib diisi.',
+            'username.required'   => 'Username wajib diisi.',
+            'username.unique'     => 'Username ini sudah terdaftar.',
             'email.email'         => 'Format email tidak valid.',
             'email.unique'        => 'Email ini sudah terdaftar.',
             'password.min'        => 'Password minimal 8 karakter.',

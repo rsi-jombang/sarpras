@@ -8,7 +8,7 @@ class CompleteRequestRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->isUnit();
+        return $this->user()->canApproveRequest();
     }
 
     public function rules(): array

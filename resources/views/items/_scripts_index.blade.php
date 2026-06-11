@@ -33,9 +33,9 @@ document.addEventListener('DOMContentLoaded', function () {
         columns: [
             { data: 'DT_RowIndex',      name: 'DT_RowIndex',    orderable: false, searchable: false, className: 'text-center' },
             { data: 'name_display',     name: 'name' },
-            { data: 'category_display', name: 'category_id',   orderable: false },
+            { data: 'category_display', name: 'category_id',   orderable: false, searchable: false },
             { data: 'unit_of_measure',  name: 'unit_of_measure', className: 'text-center' },
-            { data: 'stock_display',    name: 'total_stock',    orderable: false, className: 'text-center' },
+            { data: 'stock_display',    name: 'total_stock',    orderable: false, searchable: false, className: 'text-center' },
             { data: 'action',           name: 'action',         orderable: false, searchable: false, className: 'text-end' },
         ],
         order: [[1, 'asc']],

@@ -134,6 +134,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/create', 'create')->name('create')->can('create', Request::class);
         Route::post('/', 'store')->name('store')->can('create', Request::class);
         Route::get('/{request}', 'show')->name('show')->can('view', 'request');
+        Route::get('/{request}/pdf', 'pdf')->name('pdf')->can('view', 'request');
         Route::get('/{request}/review', 'reviewForm')->name('review.form')->can('review', 'request');
 
         Route::post('/{request}/review', 'review')->name('review')->can('review', 'request');

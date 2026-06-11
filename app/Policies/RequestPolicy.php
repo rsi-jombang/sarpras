@@ -57,13 +57,12 @@ class RequestPolicy
         ]);
     }
 
-    /** Unit konfirmasi sudah mengambil barang */
+    /** Sarpras konfirmasi pengambilan barang */
     public function complete(User $user, Request $request): bool
     {
-        if (!$user->isUnit()) return false;
+        if (!$user->canApproveRequest()) return false;
 
-        return $request->unit_id === $user->unit_id
-            && $request->status === RequestStatus::Ready;
+        return $request->status === RequestStatus::Ready;
     }
 
     /** Unit hanya bisa batalkan milik sendiri yang masih pending */

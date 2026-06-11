@@ -9,6 +9,7 @@ use App\Http\Requests\Request\StoreRequestRequest;
 use App\Models\Item;
 use App\Models\Request as RequestModel;
 use App\Services\RequestService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -53,6 +54,33 @@ class RequestController extends Controller
         ]);
 
         return view('requests.show', compact('request'));
+    }
+
+    public function pdf(RequestModel $request): \Illuminate\Http\Response
+    {
+        $this->authorize('view', $request);
+
+        $request->load([
+            'requester', 'unit', 'reviewer', 'server',
+            'items.item.category', 'items.itemStock',
+        ]);
+
+        $logoPath = public_path('images/logo.png');
+        if (file_exists($logoPath)) {
+            $logoBase64 = base64_encode(file_get_contents($logoPath));
+            $logo = 'data:image/png;base64,' . $logoBase64;
+        } else {
+            $logo = null;
+        }
+
+        $pdf = Pdf::loadView('requests.pdf', compact('request', 'logo'))
+            ->setPaper('a4', 'landscape')
+            ->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled'      => true,
+            ]);
+
+        return $pdf->download('bukti-permintaan-' . $request->request_number . '.pdf');
     }
 
     public function reviewForm(RequestModel $request): View

@@ -99,6 +99,7 @@
                             <tr>
                                 <th width="50px" class="text-center">No</th>
                                 <th>Nama</th>
+                                <th>Username</th>
                                 <th>Email</th>
                                 <th width="80px">NIP/NIK</th>
                                 <th width="100px">Role</th>
@@ -136,15 +137,25 @@
 
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
-                                <label for="userEmail" class="form-label">Email <span class="text-danger">*</span></label>
-                                <input type="email" class="form-control" id="userEmail" name="email" placeholder="email@rs.com" required>
-                                <div class="invalid-feedback" id="error-email"></div>
+                                <label for="userUsername" class="form-label">Username <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="userUsername" name="username" placeholder="Contoh: dr.andi" required>
+                                <div class="invalid-feedback" id="error-username"></div>
                             </div>
                             <div class="col-md-6">
                                 <label for="userPassword" class="form-label">Password</label>
                                 <input type="password" class="form-control" id="userPassword" name="password" placeholder="Min. 8 karakter" minlength="8">
                                 <div class="invalid-feedback" id="error-password"></div>
                                 <small class="text-muted" id="passwordHelp" style="font-size:11px">Kosongkan jika tidak ingin mengubah</small>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="userEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="userEmail" name="email" placeholder="email@rs.com">
+                                <div class="invalid-feedback" id="error-email"></div>
+                            </div>
+                            <div class="col-md-6">
                             </div>
                         </div>
 
@@ -217,16 +228,17 @@
                 processing: true,
                 serverSide: true,
                 ajax: "{{ route('users.index') }}",
-                columns: [
-                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, className: 'text-center' },
-                    { data: 'name', name: 'name', className: 'fw-bold' },
-                    { data: 'email', name: 'email' },
-                    { data: 'employee_id', name: 'employee_id', defaultContent: '<em class="text-muted" style="font-size:12.5px">—</em>' },
-                    { data: 'role_badge', name: 'role', orderable: false, searchable: false, className: 'text-center' },
-                    { data: 'unit_name', name: 'unit.name', orderable: false },
-                    { data: 'status', name: 'status', orderable: false, searchable: false, className: 'text-center' },
-                    { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-end' },
-                ],
+                    columns: [
+                        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, className: 'text-center' },
+                        { data: 'name', name: 'name', className: 'fw-bold' },
+                        { data: 'username', name: 'username' },
+                        { data: 'email', name: 'email' },
+                        { data: 'employee_id', name: 'employee_id', defaultContent: '<em class="text-muted" style="font-size:12.5px">—</em>' },
+                        { data: 'role_badge', name: 'role', orderable: false, searchable: false, className: 'text-center' },
+                        { data: 'unit_name', name: 'unit.name', orderable: false },
+                        { data: 'status', name: 'status', orderable: false, searchable: false, className: 'text-center' },
+                        { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-end' },
+                    ],
                 order: [[1, 'asc']],
                 language: { url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/id.json" },
                 createdRow: function (row, data) {
@@ -351,6 +363,7 @@
                     $('#formMethod').val('PUT');
                     $('#userId').val(user.id);
                     $('#userName').val(user.name);
+                    $('#userUsername').val(user.username);
                     $('#userEmail').val(user.email);
                     $('#userPassword').prop('required', false).val('').prop('placeholder', 'Kosongkan jika tidak diubah');
                     $('#passwordHelp').show();

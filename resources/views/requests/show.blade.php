@@ -18,6 +18,13 @@
             </nav>
         </div>
         <div class="d-flex gap-2 flex-wrap">
+            {{-- Download PDF --}}
+            <a href="{{ route('requests.pdf', $request) }}"
+               class="btn btn-outline-primary d-flex align-items-center gap-1"
+               style="border-radius:var(--radius-md);font-size:13px">
+                <i class="bi bi-file-pdf"></i> Download PDF
+            </a>
+
             {{-- Sarpras: Review --}}
             @can('review', $request)
                 <a href="{{ route('requests.review.form', $request) }}"
@@ -36,7 +43,7 @@
                 </button>
             @endcan
 
-            {{-- Unit: Konfirmasi Ambil --}}
+            {{-- Sarpras: Konfirmasi Pengambilan --}}
             @can('complete', $request)
                 <button type="button" id="btnComplete"
                         class="btn btn-success d-flex align-items-center gap-1"

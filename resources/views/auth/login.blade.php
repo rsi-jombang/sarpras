@@ -24,14 +24,14 @@
     <form method="POST" action="{{ route('login') }}" id="loginForm">
         @csrf
 
-        {{-- Email --}}
+        {{-- Username --}}
         <div class="auth-field">
-            <label for="email" class="auth-label">Alamat Email</label>
+            <label for="username" class="auth-label">Username</label>
             <div class="auth-input-wrap">
-                <i class="bi bi-envelope auth-input-icon"></i>
-                <input type="email" id="email" name="email" class="auth-input @error('email') is-invalid @enderror"
-                    placeholder="nama@rsi-jombang.com" value="{{ old('email') }}" required autofocus autocomplete="username" />
-                @error('email')
+                <i class="bi bi-person auth-input-icon"></i>
+                <input type="text" id="username" name="username" class="auth-input @error('username') is-invalid @enderror"
+                    placeholder="Masukkan username" value="{{ old('username') }}" required autofocus autocomplete="username" />
+                @error('username')
                     <div class="auth-error">
                         <i class="bi bi-exclamation-circle-fill"></i>
                         {{ $message }}

@@ -30,13 +30,29 @@
             </div>
         </div>
 
+        {{-- Username --}}
+        <div class="auth-field">
+            <label for="username" class="auth-label">Username <span class="text-danger">*</span></label>
+            <div class="auth-input-wrap">
+                <i class="bi bi-person auth-input-icon"></i>
+                <input type="text" id="username" name="username" class="auth-input @error('username') is-invalid @enderror"
+                    placeholder="Masukkan username" value="{{ old('username') }}" required autofocus autocomplete="username" />
+                @error('username')
+                    <div class="auth-error">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                        {{ $message }}
+                    </div>
+                @enderror
+            </div>
+        </div>
+
         {{-- Email --}}
         <div class="auth-field">
             <label for="email" class="auth-label">Alamat Email</label>
             <div class="auth-input-wrap">
                 <i class="bi bi-envelope auth-input-icon"></i>
                 <input type="email" id="email" name="email" class="auth-input @error('email') is-invalid @enderror"
-                    placeholder="nama@rsi-jombang.com" value="{{ old('email') }}" required autocomplete="username" />
+                    placeholder="nama@rsi-jombang.com" value="{{ old('email') }}" autocomplete="email" />
                 @error('email')
                     <div class="auth-error">
                         <i class="bi bi-exclamation-circle-fill"></i>
