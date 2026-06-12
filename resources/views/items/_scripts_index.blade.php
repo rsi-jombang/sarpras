@@ -39,7 +39,6 @@ document.addEventListener('DOMContentLoaded', function () {
             { data: 'action',           name: 'action',         orderable: false, searchable: false, className: 'text-end' },
         ],
         order: [[1, 'asc']],
-        language: { url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/id.json' },
     });
 
     $('#filterCategory, #filterType, #filterStock').on('change', () => table.draw());

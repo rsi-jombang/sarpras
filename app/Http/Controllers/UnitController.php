@@ -14,7 +14,7 @@ class UnitController extends Controller
      */
     public function index(Request $request)
     {
-        if ($request->ajax()) {
+        if ($request->ajax() && $request->has('draw')) {
             $units = Unit::query(); // Mengambil data Unit (termasuk query builder untuk Yajra)
 
             return DataTables::of($units)

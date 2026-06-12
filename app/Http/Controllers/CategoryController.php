@@ -17,7 +17,7 @@ class CategoryController extends Controller
     {
         $this->authorize('viewAny', Category::class);
 
-        if ($request->ajax()) {
+        if ($request->ajax() && $request->has('draw')) {
             $categories = Category::query();
 
             // Tambahkan filter

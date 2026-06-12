@@ -1,16 +1,16 @@
 /* resources/scss/app.scss */
 
+/* Bootstrap 5 */
+@use "bootstrap/scss/bootstrap" as *;
+
+/* Salin semua isi dashboard.css dari template ke sini */
+@use "dashboard" as *;
+
+/* DataTables Global Styling */
+@use "datatables" as *;
+
 /* Google Fonts */
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap");
 
-/* Bootstrap 5 */
-@import "bootstrap/scss/bootstrap";
-
 /* Bootstrap Icons */
 @import "bootstrap-icons/font/bootstrap-icons.css";
-
-/* Salin semua isi dashboard.css dari template ke sini */
-@import "dashboard";
-
-/* DataTables Global Styling */
-@import "datatables";

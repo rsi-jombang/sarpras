@@ -15,7 +15,7 @@ class UserController extends Controller
     {
         $this->authorize('viewAny', User::class);
 
-        if ($request->ajax()) {
+        if ($request->ajax() && $request->has('draw')) {
             $users = User::with('unit');
 
             return DataTables::of($users)
