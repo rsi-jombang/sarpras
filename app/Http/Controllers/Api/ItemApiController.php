@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Item\StoreItemRequest;
-use App\Http\Requests\Item\UpdateItemRequest;
+use App\Http\Requests\StoreItemRequest;
+use App\Http\Requests\UpdateItemRequest;
 use App\Models\Category;
 use App\Models\Item;
 use App\Models\ItemStock;

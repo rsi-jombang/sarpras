@@ -197,7 +197,6 @@
                     { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-end' }
                 ],
                 order: [[1, 'asc']],
-                language: { url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/id.json" },
                 createdRow: function(row, data, dataIndex) {
                     if (data.is_active == 0) {
                         $(row).css('background-color', 'rgba(255,0,0,0.03)');
@@ -230,6 +229,37 @@
                 timerProgressBar: true
             });
 
+            $('#btnCreateUnit').click(function () {
+                $('#unitModalTitle').text('Tambah Unit Kerja');
+                $('#formMethod').val('POST');
+                $('#unitId').val('');
+                $('#unitForm')[0].reset();
+                $('.form-control').removeClass('is-invalid');
+                $('.invalid-feedback').text('');
+                $('#unitActive').prop('checked', true);
+                $('#unitModal').modal('show');
+            });
+
+            $(document).on('click', '.btn-edit', function () {
+                const id = $(this).data('id');
+
+                $.get(`/units/${id}`, function (response) {
+                    if (!response.success) return;
+                    const unit = response.data;
+
+                    $('#unitModalTitle').text('Edit Unit: ' + unit.name);
+                    $('#formMethod').val('PUT');
+                    $('#unitId').val(unit.id);
+                    $('#unitCode').val(unit.code);
+                    $('#unitName').val(unit.name);
+                    $('#unitDescription').val(unit.description || '');
+                    $('#unitActive').prop('checked', unit.is_active);
+                    $('.form-control').removeClass('is-invalid');
+                    $('.invalid-feedback').text('');
+                    $('#unitModal').modal('show');
+                });
+            });
+
             // Submit Form (Tambah / Edit)
             $('#unitForm').submit(function(e) {
                 e.preventDefault();
@@ -237,7 +267,7 @@
                 $('.invalid-feedback').text('');
                 $('#btnSpinner').removeClass('d-none');
                 $('#btnSaveUnit').prop('disabled', true);
-                
+
                 const unitId = $('#unitId').val();
                 const isEdit = unitId !== '';
                 const url = isEdit ? `/units/${unitId}` : '/units';
