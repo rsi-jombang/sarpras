@@ -4,10 +4,12 @@ namespace App\Providers;
 
 use App\Models\Category;
 use App\Models\Request as RequestModel;
+use App\Models\StockAdjustment;
 use App\Models\Unit;
 use App\Models\User;
 use App\Policies\CategoryPolicy;
 use App\Policies\RequestPolicy;
+use App\Policies\StockAdjustmentPolicy;
 use App\Policies\UnitPolicy;
 use App\Policies\UserPolicy;
 use App\Services\ItemService;
@@ -52,5 +54,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Unit::class, UnitPolicy::class);
         Gate::policy(Category::class, CategoryPolicy::class);
         Gate::policy(User::class, UserPolicy::class);
+        Gate::policy(StockAdjustment::class, StockAdjustmentPolicy::class);
     }
 }

@@ -103,6 +103,14 @@
         </div>
 
         <li class="nav-item">
+            <a href="{{ route('stock-adjustments.index') }}"
+                class="nav-link {{ request()->routeIs('stock-adjustments*') ? 'active' : '' }}">
+                <i class="bi bi-arrow-left-right nav-icon"></i>
+                <span class="nav-label">Penyesuaian Stock</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
             <a href="{{ route('reports.index') }}"
                 class="nav-link {{ request()->routeIs('reports*') ? 'active' : '' }}">
                 <i class="bi bi-file-earmark-bar-graph-fill nav-icon"></i>

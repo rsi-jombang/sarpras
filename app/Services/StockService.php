@@ -173,6 +173,68 @@ class StockService
     // HELPER PRIVATE
     // =========================================================================
 
+    // =========================================================================
+    // PENYESUAIAN STOK MANUAL
+    // =========================================================================
+
+    /**
+     * Sesuaikan stok item secara manual: update batch, catat movement & adjustment.
+     */
+    public function adjustStock(
+        \App\Models\Item $item,
+        int $adjustmentQty,
+        string $reason,
+        int $adjustedBy,
+        ?string $notes = null,
+    ): \App\Models\StockAdjustment {
+        return DB::transaction(function () use ($item, $adjustmentQty, $reason, $adjustedBy, $notes) {
+            // Cari batch dengan stok terbanyak (prioritas utama untuk adjustment)
+            $stock = ItemStock::where('item_id', $item->id)
+                ->where('quantity', '>', 0)
+                ->orderBy('quantity', 'desc')
+                ->orderBy('created_at', 'asc')
+                ->first();
+
+            if (!$stock) {
+                throw new \Exception("Tidak ada stok tersedia untuk item {$item->name}");
+            }
+
+            $stockBefore = $stock->quantity;
+            $stockAfter = $stockBefore + $adjustmentQty;
+
+            if ($stockAfter < 0) {
+                throw new \Exception("Penyesuaian tidak valid: stok tidak boleh negatif. Stok saat ini: {$stockBefore}, adjustment: {$adjustmentQty}");
+            }
+
+            // Update batch stok
+            $stock->update(['quantity' => $stockAfter]);
+
+            // Catat pergerakan stok
+            $this->recordMovement(
+                itemStock:   $stock,
+                type:        StockMovementType::ManualAdjustment,
+                qty:         $adjustmentQty,
+                stockBefore: $stockBefore,
+                stockAfter:  $stockAfter,
+                reference:   null,
+                performedBy: $adjustedBy,
+                notes:       $notes ?: "Penyesuaian manual: {$reason}",
+            );
+
+            // Buat record adjustment
+            return \App\Models\StockAdjustment::create([
+                'item_id'              => $item->id,
+                'item_stock_id'        => $stock->id,
+                'quantity_adjustment'  => $adjustmentQty,
+                'stock_before'         => $stockBefore,
+                'stock_after'          => $stockAfter,
+                'reason'               => $reason,
+                'notes'                => $notes,
+                'adjusted_by'          => $adjustedBy,
+            ]);
+        });
+    }
+
     private function recordMovement(
         ItemStock          $itemStock,
         StockMovementType  $type,

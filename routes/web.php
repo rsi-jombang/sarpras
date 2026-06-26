@@ -176,6 +176,20 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/{stockOpname}', 'destroy')->name('destroy');
     });
 
+    // Route Stock Adjustment
+    Route::group(['prefix' => 'stock-adjustments', 'as' => 'stock-adjustments.', 'controller' => App\Http\Controllers\StockAdjustmentController::class], function () {
+        Route::get('/', 'index')->name('index')->can('viewAny', App\Models\StockAdjustment::class);
+        Route::get('/create', 'create')->name('create')->can('create', App\Models\StockAdjustment::class);
+        Route::post('/', 'store')->name('store')->can('create', App\Models\StockAdjustment::class);
+        Route::get('/{stockAdjustment}', 'show')->name('show')->can('view', 'stockAdjustment');
+        Route::delete('/{stockAdjustment}', 'destroy')->name('destroy')->can('delete', 'stockAdjustment');
+    });
+
+    // Route Stock Adjustment Api
+    Route::group(['prefix' => 'api/stock-adjustments', 'as' => 'api.stock-adjustments.', 'controller' => App\Http\Controllers\Api\StockAdjustmentApiController::class], function () {
+        Route::get('/', 'index')->name('index');
+    });
+
     // Route Report
     Route::group(['prefix' => 'reports', 'as' => 'reports.', 'controller' => App\Http\Controllers\ReportController::class], function () {
         // Halaman utama laporan
