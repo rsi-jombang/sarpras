@@ -162,13 +162,14 @@ class PurchaseOrderService
         $total = 0;
 
         foreach ($items as $item) {
-            $subtotal = $item['quantity_ordered'] * $item['unit_price'];
+            $subtotal = isset($item['subtotal']) ? (float) $item['subtotal'] : (int) $item['quantity_ordered'] * (float) $item['unit_price'];
             $total   += $subtotal;
 
             $po->items()->create([
                 'item_id'          => $item['item_id'],
                 'quantity_ordered'  => $item['quantity_ordered'],
                 'unit_price'       => $item['unit_price'],
+                'subtotal'         => $subtotal,
                 'batch_number'     => $item['batch_number'] ?? null,
                 'expired_date'     => $item['expired_date'] ?? null,
                 'notes'            => $item['notes'] ?? null,

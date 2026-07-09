@@ -24,6 +24,7 @@ class StorePurchaseOrderRequest extends FormRequest
             'items.*.item_id'            => ['required', 'exists:items,id'],
             'items.*.quantity_ordered'   => ['required', 'integer', 'min:1'],
             'items.*.unit_price'         => ['required', 'numeric', 'min:0'],
+            'items.*.subtotal'           => ['nullable', 'numeric', 'min:0'],
             'items.*.batch_number'       => ['nullable', 'string', 'max:100'],
             'items.*.expired_date'       => ['nullable', 'date', 'after:today'],
             'items.*.notes'              => ['nullable', 'string', 'max:255'],

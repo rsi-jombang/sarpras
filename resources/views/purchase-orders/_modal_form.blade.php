@@ -139,7 +139,13 @@
                        min="0" value="0" style="font-size: 13px" required>
             </div>
         </td>
-        <td class="text-end item-subtotal fw-semibold" style="font-size: 13px; color: var(--accent-primary)">Rp 0</td>
+        <td class="text-end">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text" style="font-size: 12px">Rp</span>
+                <input type="number" class="form-control text-end item-subtotal" name="items[__INDEX__][subtotal]"
+                       min="0" value="0" style="font-size: 13px; width: 110px">
+            </div>
+        </td>
         <td>
             <input type="text" class="form-control form-control-sm" name="items[__INDEX__][batch_number]"
                    placeholder="No. batch" style="font-size: 12px; width: 90px">

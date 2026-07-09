@@ -82,6 +82,13 @@ class RequestService
                 }
             }
 
+            if ($action === 'reject') {
+                $request->items()->each->update([
+                    'status'           => 'rejected',
+                    'quantity_approved' => 0,
+                ]);
+            }
+
             $newStatus = match ($action) {
                 'approve' => RequestStatus::Approved,
                 'partial' => RequestStatus::Partial,

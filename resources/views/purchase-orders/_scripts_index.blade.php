@@ -85,14 +85,18 @@ document.addEventListener('DOMContentLoaded', function () {
     function recalcTotal() {
         let grand = 0;
         $('#itemsBody .item-row').each(function () {
-            const qty   = parseInt($(this).find('.item-qty').val()) || 0;
-            const price = parseInt($(this).find('.item-price').val()) || 0;
-            const sub   = qty * price;
-            $(this).find('.item-subtotal').text(formatRupiah(sub));
+            const sub = parseInt($(this).find('.item-subtotal').val()) || 0;
             grand += sub;
         });
         $('#grandTotal').text(formatRupiah(grand));
         toggleEmptyMsg();
+    }
+
+    function autoCalcSubtotal($row) {
+        const qty   = parseInt($row.find('.item-qty').val()) || 0;
+        const price = parseInt($row.find('.item-price').val()) || 0;
+        $row.find('.item-subtotal').val(qty * price);
+        recalcTotal();
     }
 
     function toggleEmptyMsg() {
@@ -120,6 +124,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         if (data.quantity_ordered)  $row.find('.item-qty').val(data.quantity_ordered);
         if (data.unit_price)        $row.find('.item-price').val(data.unit_price);
+        if (data.subtotal)          $row.find('.item-subtotal').val(data.subtotal);
         if (data.batch_number)      $row.find('[name*="batch_number"]').val(data.batch_number);
         if (data.expired_date)      $row.find('[name*="expired_date"]').val(data.expired_date?.substring(0, 10));
         $('#itemsBody').append($row);
@@ -132,7 +137,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const opt = $(this).find(':selected');
             $(this).closest('.item-row').find('.item-uom').text(opt.data('uom') || '—');
         })
-        .on('input', '.item-qty, .item-price', recalcTotal)
+        .on('input', '.item-qty, .item-price', function () {
+            autoCalcSubtotal($(this).closest('.item-row'));
+        })
+        .on('input', '.item-subtotal', recalcTotal)
         .on('click', '.btn-remove-item', function () {
             $(this).closest('.item-row').remove();
             recalcTotal();
@@ -173,6 +181,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 item_id:          item.item_id,
                 quantity_ordered:  item.quantity_ordered,
                 unit_price:       item.unit_price,
+                subtotal:         item.subtotal,
                 batch_number:     item.batch_number,
                 expired_date:     item.expired_date,
             }));
