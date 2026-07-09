@@ -70,13 +70,13 @@
                             <table class="table table-sm align-middle mb-0" id="itemsTable" style="font-size: 13px">
                                 <thead>
                                     <tr style="background: var(--bg-surface)">
-                                        <th style="width: 35%">Barang</th>
-                                        <th style="width: 12%" class="text-center">Jumlah</th>
-                                        <th style="width: 10%" class="text-center">Satuan</th>
-                                        <th style="width: 18%">Harga Satuan (Rp)</th>
-                                        <th style="width: 14%" class="text-end">Subtotal</th>
-                                        <th style="width: 11%" class="text-center">Batch / Lot</th>
-                                        <th style="width: 8%" class="text-center">Exp. Date</th>
+                                        <th style="width: 25%">Barang</th>
+                                        <th style="width: 10%" class="text-center">Jumlah</th>
+                                        <th style="width: 8%" class="text-center">Satuan</th>
+                                        <th style="width: 15%">Harga Satuan (Rp)</th>
+                                        <th style="width: 20%" class="text-end">Subtotal (Rp)</th>
+                                        <th style="width: 10%" class="text-center">Batch / Lot</th>
+                                        <th style="width: 10%" class="text-center">Exp. Date</th>
                                         <th style="width: 50px" class="text-center">Aksi</th>
                                     </tr>
                                 </thead>
@@ -121,7 +121,7 @@
     <tr class="item-row">
         <td>
             <select class="form-select form-select-sm item-select" name="items[__INDEX__][item_id]"
-                    style="font-size: 13px; min-width: 200px" required>
+                    style="font-size: 13px" required>
                 <option value="">-- Pilih Barang --</option>
             </select>
         </td>
@@ -139,20 +139,20 @@
                        min="0" value="0" style="font-size: 13px" required>
             </div>
         </td>
-        <td class="text-end">
+        <td class="text-end" style="min-width: 150px">
             <div class="input-group input-group-sm">
                 <span class="input-group-text" style="font-size: 12px">Rp</span>
                 <input type="number" class="form-control text-end item-subtotal" name="items[__INDEX__][subtotal]"
-                       min="0" value="0" style="font-size: 13px; width: 110px">
+                       min="0" value="0" style="font-size: 13px">
             </div>
         </td>
         <td>
             <input type="text" class="form-control form-control-sm" name="items[__INDEX__][batch_number]"
-                   placeholder="No. batch" style="font-size: 12px; width: 90px">
+                   placeholder="No. batch" style="font-size: 12px">
         </td>
         <td>
             <input type="date" class="form-control form-control-sm" name="items[__INDEX__][expired_date]"
-                   style="font-size: 12px; width: 135px">
+                   style="font-size: 12px">
         </td>
         <td class="text-center">
             <button type="button" class="btn btn-sm btn-outline-danger btn-remove-item"
