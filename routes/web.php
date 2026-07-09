@@ -135,8 +135,11 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/', 'store')->name('store')->can('create', Request::class);
         Route::get('/{request}', 'show')->name('show')->can('view', 'request');
         Route::get('/{request}/pdf', 'pdf')->name('pdf')->can('view', 'request');
+        Route::get('/{request}/edit', 'edit')->name('edit')->can('update', 'request');
+        Route::put('/{request}', 'update')->name('update')->can('update', 'request');
         Route::get('/{request}/review', 'reviewForm')->name('review.form')->can('review', 'request');
 
+        Route::post('/{request}/submit', 'submit')->name('submit')->can('submit', 'request');
         Route::post('/{request}/review', 'review')->name('review')->can('review', 'request');
         Route::post('/{request}/fulfill', 'fulfill')->name('fulfill')->can('fulfill', 'request');
         Route::post('/{request}/complete', 'complete')->name('complete')->can('complete', 'request');

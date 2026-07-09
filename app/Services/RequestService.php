@@ -17,14 +17,14 @@ class RequestService
     // -------------------------------------------------------------------------
     // Buat permintaan baru oleh unit
     // -------------------------------------------------------------------------
-    public function create(User $requester, array $data): RequestModel
+    public function createDraft(User $requester, array $data): RequestModel
     {
         return DB::transaction(function () use ($requester, $data) {
             $request = RequestModel::create([
                 'request_number' => $this->numberGenerator->generateRequestNumber(),
                 'requested_by'   => $requester->id,
                 'unit_id'        => $requester->unit_id,
-                'status'         => RequestStatus::Pending,
+                'status'         => RequestStatus::Draft,
                 'priority'       => $data['priority'],
                 'request_date'   => now()->toDateString(),
                 'needed_date'    => $data['needed_date'] ?? null,
@@ -43,6 +43,67 @@ class RequestService
 
             return $request;
         });
+    }
+
+    // -------------------------------------------------------------------------
+    // Update DRAFT permintaan oleh unit
+    // -------------------------------------------------------------------------
+    public function updateDraft(RequestModel $request, array $data): RequestModel
+    {
+        return DB::transaction(function () use ($request, $data) {
+            $request->update([
+                'priority'       => $data['priority'],
+                'needed_date'    => $data['needed_date'] ?? null,
+                'purpose'        => $data['purpose'] ?? null,
+                'notes'          => $data['notes'] ?? null,
+            ]);
+
+            $existingItemIds = $request->items->pluck('id')->toArray();
+            $newItemIds = [];
+
+            // Update atau buat item baru
+            foreach ($data['items'] as $itemData) {
+                if (isset($itemData['request_item_id']) && in_array($itemData['request_item_id'], $existingItemIds)) {
+                    // Update item yang sudah ada
+                    $reqItem = $request->items()->find($itemData['request_item_id']);
+                    $reqItem->update([
+                        'quantity_requested' => $itemData['quantity_requested'],
+                        'notes'              => $itemData['notes'] ?? null,
+                    ]);
+                    $newItemIds[] = $reqItem->id;
+                } else {
+                    // Buat item baru
+                    $newReqItem = $request->items()->create([
+                        'item_id'            => $itemData['item_id'],
+                        'quantity_requested' => $itemData['quantity_requested'],
+                        'notes'              => $itemData['notes'] ?? null,
+                        'status'             => 'pending',
+                    ]);
+                    $newItemIds[] = $newReqItem->id;
+                }
+            }
+
+            // Hapus item yang tidak ada di request baru
+            $itemsToDelete = array_diff($existingItemIds, $newItemIds);
+            if (!empty($itemsToDelete)) {
+                $request->items()->whereIn('id', $itemsToDelete)->delete();
+            }
+
+            return $request->fresh();
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // Unit submit draft → status Pending
+    // -------------------------------------------------------------------------
+    public function submitDraft(RequestModel $request): RequestModel
+    {
+        $request->update([
+            'status'       => RequestStatus::Pending,
+            'request_date' => now()->toDateString(), // Update tanggal saat disubmit
+        ]);
+
+        return $request->fresh();
     }
 
     // -------------------------------------------------------------------------

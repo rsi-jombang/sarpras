@@ -1,6 +1,10 @@
+@php
+    $isEdit = isset($request);
+@endphp
+
 @extends('layouts.app')
 
-@section('title', 'Ajukan Permintaan Barang')
+@section('title', $isEdit ? 'Edit Draft Permintaan' : 'Ajukan Permintaan Barang')
 
 @section('content')
 @push('styles')
@@ -19,12 +23,14 @@
     {{-- Header --}}
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4 animate-in">
         <div>
-            <h1 class="h3 fw-bold mb-1" style="color:var(--text-primary)">Ajukan Permintaan Barang</h1>
+            <h1 class="h3 fw-bold mb-1" style="color:var(--text-primary)">
+                {{ $isEdit ? 'Edit Draft Permintaan' : 'Ajukan Permintaan Barang' }}
+            </h1>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0" style="font-size:12.5px">
                     <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none" style="color:var(--text-muted)">Dashboard</a></li>
                     <li class="breadcrumb-item"><a href="{{ route('requests.index') }}" class="text-decoration-none" style="color:var(--text-muted)">Permintaan</a></li>
-                    <li class="breadcrumb-item active" style="color:var(--text-secondary)">Ajukan Baru</li>
+                    <li class="breadcrumb-item active" style="color:var(--text-secondary)">{{ $isEdit ? 'Edit Draft' : 'Ajukan Baru' }}</li>
                 </ol>
             </nav>
         </div>
@@ -44,8 +50,11 @@
         </div>
     </div>
 
-    <form action="{{ route('requests.store') }}" method="POST" id="createRequestForm" novalidate>
+    <form action="{{ $isEdit ? route('requests.update', $request) : route('requests.store') }}" method="POST" id="requestForm" novalidate>
         @csrf
+        @if($isEdit)
+            @method('PUT')
+        @endif
 
         <div class="row g-4">
             {{-- Kolom Kiri: Info Umum --}}
@@ -62,10 +71,10 @@
                             </label>
                             <select name="priority" class="form-select form-select-sm @error('priority') is-invalid @enderror"
                                     style="font-size:13px" required>
-                                <option value="low"    {{ old('priority') === 'low'    ? 'selected' : '' }}>Rendah</option>
-                                <option value="normal" {{ old('priority', 'normal') === 'normal' ? 'selected' : '' }}>Normal</option>
-                                <option value="high"   {{ old('priority') === 'high'   ? 'selected' : '' }}>Tinggi</option>
-                                <option value="urgent" {{ old('priority') === 'urgent' ? 'selected' : '' }}>Mendesak</option>
+                                <option value="low"    @selected(old('priority', $isEdit ? $request->priority->value : 'normal') == 'low')>Rendah</option>
+                                <option value="normal" @selected(old('priority', $isEdit ? $request->priority->value : 'normal') == 'normal')>Normal</option>
+                                <option value="high"   @selected(old('priority', $isEdit ? $request->priority->value : 'normal') == 'high')>Tinggi</option>
+                                <option value="urgent" @selected(old('priority', $isEdit ? $request->priority->value : 'normal') == 'urgent')>Mendesak</option>
                             </select>
                             @error('priority')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
@@ -74,7 +83,7 @@
                             <label class="form-label" style="font-size:13px;font-weight:500">Tanggal Dibutuhkan</label>
                             <input type="date" name="needed_date"
                                    class="form-control form-control-sm @error('needed_date') is-invalid @enderror"
-                                   value="{{ old('needed_date') }}" min="{{ date('Y-m-d') }}" style="font-size:13px">
+                                   value="{{ old('needed_date', $isEdit ? ($request->needed_date ? $request->needed_date->format('Y-m-d') : '') : '') }}" min="{{ date('Y-m-d') }}" style="font-size:13px">
                             @error('needed_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
 
@@ -83,7 +92,7 @@
                             <textarea name="purpose" rows="3"
                                       class="form-control form-control-sm @error('purpose') is-invalid @enderror"
                                       placeholder="Contoh: Untuk keperluan pasien rawat inap..."
-                                      style="font-size:13px">{{ old('purpose') }}</textarea>
+                                      style="font-size:13px">{{ old('purpose', $isEdit ? $request->purpose : '') }}</textarea>
                             @error('purpose')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
 
@@ -92,7 +101,7 @@
                             <textarea name="notes" rows="2"
                                       class="form-control form-control-sm @error('notes') is-invalid @enderror"
                                       placeholder="Keterangan lain jika diperlukan..."
-                                      style="font-size:13px">{{ old('notes') }}</textarea>
+                                      style="font-size:13px">{{ old('notes', $isEdit ? $request->notes : '') }}</textarea>
                             @error('notes')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                     </div>
@@ -130,11 +139,40 @@
                                         <th style="width:5%" class="text-center">Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody id="itemsBody"></tbody>
+                                <tbody id="itemsBody">
+                                    @if($isEdit)
+                                        @foreach($request->items as $index => $reqItem)
+                                            <tr class="item-row" data-index="{{ $index }}">
+                                                <td>
+                                                    <select class="form-select form-select-sm item-select" name="items[{{ $index }}][item_id]" data-selected-id="{{ $reqItem->item_id }}" style="font-size:13px;min-width:200px" required>
+                                                        <option value="">-- Pilih Barang --</option>
+                                                    </select>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="item-stock text-muted fw-semibold" style="font-size:13px">{{ $reqItem->item->total_stock ?? '—' }}</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="number" class="form-control form-control-sm text-center item-qty" name="items[{{ $index }}][quantity_requested]" min="1" value="{{ $reqItem->quantity_requested }}" style="font-size:13px;width:70px;margin:0 auto" required>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="item-uom text-muted" style="font-size:12px">{{ $reqItem->item->uom ?? '—' }}</span>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm item-note" name="items[{{ $index }}][notes]" value="{{ $reqItem->notes }}" placeholder="Keterangan..." style="font-size:12px">
+                                                </td>
+                                                <td class="text-center">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger btn-remove-item" style="border-radius:var(--radius-sm);width:30px;height:30px;padding:0">
+                                                        <i class="bi bi-trash" style="font-size:12px"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @endif
+                                </tbody>
                             </table>
                         </div>
 
-                        <div id="emptyMsg" class="text-center py-5 text-muted" style="font-size:13px">
+                        <div id="emptyMsg" class="text-center py-5 text-muted {{ $isEdit && $request->items->isNotEmpty() ? 'd-none' : '' }}" style="font-size:13px">
                             <i class="bi bi-inbox fs-2 d-block mb-2 opacity-50"></i>
                             Belum ada barang. Klik <strong>"Tambah Barang"</strong> untuk mulai.
                         </div>
@@ -150,7 +188,7 @@
                             id="btnSubmit"
                             style="border-radius:var(--radius-md);background:var(--accent-primary);border-color:var(--accent-primary);font-size:13px">
                         <span class="spinner-border spinner-border-sm d-none" id="btnSubmitSpinner"></span>
-                        <i class="bi bi-send"></i> Kirim Permintaan
+                        <i class="bi bi-save"></i> {{ $isEdit ? 'Simpan Perubahan' : 'Simpan Draft' }}
                     </button>
                 </div>
             </div>
@@ -163,33 +201,24 @@
 <template id="itemRowTpl">
     <tr class="item-row" data-index="__INDEX__">
         <td>
-            <select class="form-select form-select-sm item-select"
-                    name="items[__INDEX__][item_id]" style="font-size:13px;min-width:200px" required>
+            <select class="form-select form-select-sm item-select" name="items[__INDEX__][item_id]" style="font-size:13px;min-width:200px" required>
                 <option value="">-- Pilih Barang --</option>
             </select>
-            @if($errors->has('items.__INDEX__.item_id'))
-                <div class="text-danger" style="font-size:11.5px">{{ $errors->first('items.__INDEX__.item_id') }}</div>
-            @endif
         </td>
         <td class="text-center">
             <span class="item-stock text-muted fw-semibold" style="font-size:13px">—</span>
         </td>
         <td class="text-center">
-            <input type="number" class="form-control form-control-sm text-center item-qty"
-                   name="items[__INDEX__][quantity_requested]"
-                   min="1" value="1" style="font-size:13px;width:70px;margin:0 auto" required>
+            <input type="number" class="form-control form-control-sm text-center item-qty" name="items[__INDEX__][quantity_requested]" min="1" value="1" style="font-size:13px;width:70px;margin:0 auto" required>
         </td>
         <td class="text-center">
             <span class="item-uom text-muted" style="font-size:12px">—</span>
         </td>
         <td>
-            <input type="text" class="form-control form-control-sm item-note"
-                   name="items[__INDEX__][notes]"
-                   placeholder="Keterangan..." style="font-size:12px">
+            <input type="text" class="form-control form-control-sm item-note" name="items[__INDEX__][notes]" placeholder="Keterangan..." style="font-size:12px">
         </td>
         <td class="text-center">
-            <button type="button" class="btn btn-sm btn-outline-danger btn-remove-item"
-                    style="border-radius:var(--radius-sm);width:30px;height:30px;padding:0">
+            <button type="button" class="btn btn-sm btn-outline-danger btn-remove-item" style="border-radius:var(--radius-sm);width:30px;height:30px;padding:0">
                 <i class="bi bi-trash" style="font-size:12px"></i>
             </button>
         </td>
@@ -200,5 +229,11 @@
 @push('scripts')
 <!-- Select2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+    const IS_EDIT_MODE = @json($isEdit);
+    const EXISTING_ITEMS = @json($isEdit ? $request->items->keyBy('item_id') : []);
+</script>
+
 @include('requests._scripts_create')
 @endpush
