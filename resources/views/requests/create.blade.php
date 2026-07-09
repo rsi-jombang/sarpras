@@ -150,7 +150,7 @@
                             id="btnSubmit"
                             style="border-radius:var(--radius-md);background:var(--accent-primary);border-color:var(--accent-primary);font-size:13px">
                         <span class="spinner-border spinner-border-sm d-none" id="btnSubmitSpinner"></span>
-                        <i class="bi bi-send"></i> Kirim Permintaan
+                        <i class="bi bi-save"></i> Simpan Draft
                     </button>
                 </div>
             </div>

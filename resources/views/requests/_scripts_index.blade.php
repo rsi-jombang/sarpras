@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function loadStats() {
         $.get(`${API}/stats`, res => {
             if (!res.success) return;
-            ['total','pending','approved','ready','completed'].forEach(key => {
+            ['total','draft','pending','approved','ready','completed'].forEach(key => {
                 const el = document.getElementById(`stat-${key}`);
                 if (el) el.textContent = res.data[key] ?? 0;
             });
@@ -80,6 +80,35 @@ document.addEventListener('DOMContentLoaded', function () {
             $('#filterUnit').html(opts);
         });
     }
+
+    // =========================================================================
+    // Submit — unit kirim draft
+    // =========================================================================
+    $(document).on('click', '.btn-submit', function () {
+        const id = $(this).data('id');
+        Swal.fire({
+            ...swalCfg(),
+            title: 'Kirim Permintaan?',
+            text: 'Draft akan dikirim ke Sarpras untuk direview.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '<i class="bi bi-send"></i> Ya, Kirim',
+            cancelButtonText: 'Batal',
+            customClass: { confirmButton: 'btn btn-success text-white px-4 py-2 me-2', cancelButton: 'btn btn-outline-secondary px-4 py-2' },
+            buttonsStyling: false,
+        }).then(res => {
+            if (!res.isConfirmed) return;
+            $.post(`${API}/${id}/submit`, {}, data => {
+                if (data.success) {
+                    Toast.fire({ ...swalCfg(), icon: 'success', title: data.message });
+                    table.ajax.reload(null, false);
+                    loadStats();
+                }
+            }).fail(xhr => {
+                Toast.fire({ ...swalCfg(), icon: 'error', title: xhr.responseJSON?.message || 'Gagal mengirim permintaan.' });
+            });
+        });
+    });
 
     // =========================================================================
     // Fulfill — sarpras siapkan barang

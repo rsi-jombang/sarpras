@@ -24,7 +24,7 @@ class RequestService
                 'request_number' => $this->numberGenerator->generateRequestNumber(),
                 'requested_by'   => $requester->id,
                 'unit_id'        => $requester->unit_id,
-                'status'         => RequestStatus::Pending,
+                'status'         => RequestStatus::Draft,
                 'priority'       => $data['priority'],
                 'request_date'   => now()->toDateString(),
                 'needed_date'    => $data['needed_date'] ?? null,
@@ -43,6 +43,16 @@ class RequestService
 
             return $request;
         });
+    }
+
+    // -------------------------------------------------------------------------
+    // Unit kirim draft → pending
+    // -------------------------------------------------------------------------
+    public function submit(RequestModel $request): RequestModel
+    {
+        $request->update(['status' => RequestStatus::Pending]);
+
+        return $request->fresh();
     }
 
     // -------------------------------------------------------------------------

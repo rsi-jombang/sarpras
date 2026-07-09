@@ -29,21 +29,30 @@ class RequestPolicy
         return $user->isUnit();
     }
 
-    /** Hanya bisa edit jika masih pending dan milik unit sendiri */
+    /** Hanya bisa edit jika masih draft atau pending dan milik unit sendiri */
     public function update(User $user, Request $request): bool
     {
         if (!$user->isUnit()) return false;
 
         return $request->unit_id === $user->unit_id
-            && $request->status === RequestStatus::Pending;
+            && in_array($request->status, [RequestStatus::Draft, RequestStatus::Pending]);
     }
 
-    /** Hanya sarpras/admin yang bisa approve atau reject */
+    /** Hanya sarpras/admin yang bisa approve atau reject (tidak bisa untuk draft) */
     public function review(User $user, Request $request): bool
     {
         if (!$user->canApproveRequest()) return false;
 
         return $request->status === RequestStatus::Pending;
+    }
+
+    /** Unit mengirim draft ke sarpras */
+    public function submit(User $user, Request $request): bool
+    {
+        if (!$user->isUnit()) return false;
+
+        return $request->unit_id === $user->unit_id
+            && $request->status->canBeSubmitted();
     }
 
     /** Sarpras menandai barang sudah siap diambil */

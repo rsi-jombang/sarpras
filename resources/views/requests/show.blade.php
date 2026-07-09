@@ -25,6 +25,15 @@
                 <i class="bi bi-file-pdf"></i> Download PDF
             </a>
 
+            {{-- Unit: Kirim Draft --}}
+            @can('submit', $request)
+                <button type="button" id="btnSubmit"
+                        class="btn btn-success d-flex align-items-center gap-1"
+                        style="border-radius:var(--radius-md);font-size:13px">
+                    <i class="bi bi-send"></i> Kirim Permintaan
+                </button>
+            @endcan
+
             {{-- Sarpras: Review --}}
             @can('review', $request)
                 <a href="{{ route('requests.review.form', $request) }}"
@@ -81,6 +90,7 @@
                 <div class="card-body p-4">
                     @php
                         $statusMap = [
+                            'draft'     => ['secondary', 'Draft'],
                             'pending'   => ['warning',   'Menunggu Review'],
                             'approved'  => ['info',      'Disetujui'],
                             'partial'   => ['info',      'Disetujui Sebagian'],
@@ -102,12 +112,13 @@
                     <div class="timeline" style="font-size:12.5px">
                         @php
                             $timeline = [
-                                ['pending',   'bi-clipboard-plus',  'Diajukan',    $request->created_at],
-                                ['approved',  'bi-check-circle',    'Direview',    $request->reviewed_at],
-                                ['ready',     'bi-box-seam',        'Disiapkan',   $request->served_at],
-                                ['completed', 'bi-bag-check',       'Diterima',    $request->received_at],
+                                ['draft',     'bi-file-earmark',    'Draft',      $request->created_at],
+                                ['pending',   'bi-clipboard-plus',  'Diajukan',   $request->status->value === 'draft' ? null : $request->created_at],
+                                ['approved',  'bi-check-circle',    'Direview',   $request->reviewed_at],
+                                ['ready',     'bi-box-seam',        'Disiapkan',  $request->served_at],
+                                ['completed', 'bi-bag-check',       'Diterima',   $request->received_at],
                             ];
-                            $order = ['pending','approved','partial','ready','completed','cancelled'];
+                            $order = ['draft','pending','approved','partial','ready','completed','cancelled'];
                             $currentIdx = array_search($request->status->value, $order);
                         @endphp
 

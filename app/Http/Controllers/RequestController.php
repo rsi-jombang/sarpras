@@ -41,7 +41,20 @@ class RequestController extends Controller
         $req = $this->requestService->create($request->user(), $request->validated());
 
         return redirect()->route('requests.show', $req)
-            ->with('success', 'Permintaan ' . $req->request_number . ' berhasil diajukan.');
+            ->with('success', 'Draft permintaan ' . $req->request_number . ' berhasil disimpan. Silakan kirim setelah selesai.');
+    }
+
+    // -------------------------------------------------------------------------
+    // Unit kirim draft → pending
+    // -------------------------------------------------------------------------
+    public function submit(Request $httpRequest, RequestModel $request): RedirectResponse
+    {
+        $this->authorize('submit', $request);
+
+        $this->requestService->submit($request);
+
+        return redirect()->route('requests.show', $request)
+            ->with('success', 'Permintaan ' . $request->request_number . ' berhasil dikirim dan menunggu review Sarpras.');
     }
 
     public function show(RequestModel $request): View

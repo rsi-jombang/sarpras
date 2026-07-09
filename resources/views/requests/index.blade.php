@@ -28,6 +28,7 @@
     <div class="row g-3 mb-4 animate-in">
         @foreach([
             ['total',     'bi-clipboard-list',  'var(--accent-primary)', 'rgba(79,70,229,0.1)',  'Total'],
+            ['draft',     'bi-file-earmark',    '#6b7280',               'rgba(107,114,128,0.1)','Draft'],
             ['pending',   'bi-hourglass-split', '#eab308',               'rgba(234,179,8,0.1)',  'Menunggu Review'],
             ['approved',  'bi-check-circle',    '#0ea5e9',               'rgba(14,165,233,0.1)', 'Disetujui'],
             ['ready',     'bi-box-seam',        '#8b5cf6',               'rgba(139,92,246,0.1)', 'Siap Diambil'],
@@ -73,6 +74,7 @@
                 @endif
                 <select id="filterStatus" class="form-select form-select-sm" style="width:auto;border-radius:50px;font-size:13px">
                     <option value="">Semua Status</option>
+                    <option value="draft">Draft</option>
                     <option value="pending">Menunggu</option>
                     <option value="approved">Disetujui</option>
                     <option value="partial">Sebagian</option>

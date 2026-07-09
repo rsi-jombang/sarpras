@@ -72,6 +72,7 @@ class RequestApiController extends Controller
             })
             ->addColumn('status_badge', function (RequestModel $req) {
                 $map = [
+                    'draft'     => ['secondary', 'Draft'],
                     'pending'   => ['warning',   'Menunggu'],
                     'approved'  => ['info',      'Disetujui'],
                     'partial'   => ['info',      'Sebagian'],
@@ -99,6 +100,13 @@ class RequestApiController extends Controller
                     class="btn btn-sm btn-outline-primary me-1" title="Detail"
                     style="border-radius:var(--radius-sm)"><i class="bi bi-eye"></i></a>';
 
+                // Unit: kirim draft
+                if ($user->isUnit() && $req->status->value === 'draft' && $req->unit_id === $user->unit_id) {
+                    $buttons .= '<button class="btn btn-sm btn-outline-success me-1 btn-submit"
+                        data-id="' . $req->id . '" title="Kirim Permintaan"
+                        style="border-radius:var(--radius-sm)"><i class="bi bi-send"></i></button>';
+                }
+
                 // Sarpras: tombol review jika pending
                 if ($user->canApproveRequest() && $req->status->value === 'pending') {
                     $buttons .= '<a href="' . route('requests.review', $req->id) . '"
@@ -113,8 +121,8 @@ class RequestApiController extends Controller
                         style="border-radius:var(--radius-sm)"><i class="bi bi-box-arrow-in-down"></i></button>';
                 }
 
-                // Unit: batalkan jika masih pending
-                if ($user->isUnit() && $req->status->value === 'pending' && $req->unit_id === $user->unit_id) {
+                // Unit: batalkan jika masih draft atau pending
+                if ($user->isUnit() && in_array($req->status->value, ['draft', 'pending']) && $req->unit_id === $user->unit_id) {
                     $buttons .= '<button class="btn btn-sm btn-outline-danger btn-cancel"
                         data-id="' . $req->id . '" data-no="' . e($req->request_number) . '" title="Batalkan"
                         style="border-radius:var(--radius-sm)"><i class="bi bi-x-lg"></i></button>';
@@ -150,6 +158,7 @@ class RequestApiController extends Controller
             'success' => true,
             'data'    => [
                 'total'     => (clone $base)->count(),
+                'draft'     => (clone $base)->where('status', 'draft')->count(),
                 'pending'   => (clone $base)->where('status', 'pending')->count(),
                 'approved'  => (clone $base)->whereIn('status', ['approved', 'partial'])->count(),
                 'ready'     => (clone $base)->where('status', 'ready')->count(),
@@ -190,6 +199,21 @@ class RequestApiController extends Controller
         return response()->json([
             'success' => true,
             'message' => $request->request_number . ' selesai. Barang telah diterima.',
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // Submit — unit kirim draft ke sarpras
+    // -------------------------------------------------------------------------
+    public function submit(RequestModel $request): JsonResponse
+    {
+        $this->authorize('submit', $request);
+
+        app(\App\Services\RequestService::class)->submit($request);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Permintaan ' . $request->request_number . ' berhasil dikirim. Menunggu review Sarpras.',
         ]);
     }
 

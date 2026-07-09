@@ -18,6 +18,33 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // -------------------------------------------------------------------------
+    // Submit — unit kirim draft ke sarpras
+    // -------------------------------------------------------------------------
+    $('#btnSubmit').on('click', function () {
+        Swal.fire({
+            ...swalCfg(),
+            title: 'Kirim Permintaan?',
+            text: 'Draft akan dikirim ke Sarpras untuk direview.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '<i class="bi bi-send"></i> Ya, Kirim',
+            cancelButtonText: 'Batal',
+            customClass: { confirmButton: 'btn btn-success text-white px-4 py-2 me-2', cancelButton: 'btn btn-outline-secondary px-4 py-2' },
+            buttonsStyling: false,
+        }).then(res => {
+            if (!res.isConfirmed) return;
+            $.post(`${API}/${REQ_ID}/submit`, {}, data => {
+                if (data.success) {
+                    Toast.fire({ ...swalCfg(), icon: 'success', title: data.message });
+                    setTimeout(() => location.reload(), 1200);
+                }
+            }).fail(xhr => {
+                Toast.fire({ ...swalCfg(), icon: 'error', title: xhr.responseJSON?.message || 'Gagal mengirim permintaan.' });
+            });
+        });
+    });
+
+    // -------------------------------------------------------------------------
     // Fulfill
     // -------------------------------------------------------------------------
     $('#btnFulfill').on('click', function () {
@@ -76,7 +103,10 @@ document.addEventListener('DOMContentLoaded', function () {
         Swal.fire({
             ...swalCfg(),
             title: 'Batalkan Permintaan?',
-            text: 'Permintaan ini tidak dapat dibatalkan setelah dikonfirmasi.',
+            @php
+                $isDraft = $request->status->value === 'draft';
+            @endphp
+            text: '{{ $isDraft ? "Draft ini akan dibatalkan dan tidak akan dikirim ke Sarpras." : "Permintaan ini tidak dapat dibatalkan setelah dikonfirmasi." }}',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: '<i class="bi bi-x-lg"></i> Ya, Batalkan',

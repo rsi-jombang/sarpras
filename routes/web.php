@@ -138,6 +138,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{request}/review', 'reviewForm')->name('review.form')->can('review', 'request');
 
         Route::post('/{request}/review', 'review')->name('review')->can('review', 'request');
+        Route::post('/{request}/submit', 'submit')->name('submit')->can('submit', 'request');
         Route::post('/{request}/fulfill', 'fulfill')->name('fulfill')->can('fulfill', 'request');
         Route::post('/{request}/complete', 'complete')->name('complete')->can('complete', 'request');
         Route::post('/{request}/cancel', 'cancel')->name('cancel')->can('cancel', 'request');
@@ -151,6 +152,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/units', 'units')->name('units');
 
         // Aksi status via AJAX
+        Route::post('/{request}/submit', 'submit')->name('submit');
         Route::post('/{request}/fulfill', 'fulfill')->name('fulfill');
         Route::post('/{request}/complete', 'complete')->name('complete');
         Route::post('/{request}/cancel', 'cancel')->name('cancel');
