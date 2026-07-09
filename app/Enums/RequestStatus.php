@@ -4,7 +4,6 @@ namespace App\Enums;
 
 enum RequestStatus: string
 {
-    case Draft     = 'draft';
     case Pending   = 'pending';
     case Approved  = 'approved';
     case Partial   = 'partial';
@@ -16,7 +15,6 @@ enum RequestStatus: string
     public function label(): string
     {
         return match($this) {
-            self::Draft     => 'Draft',
             self::Pending   => 'Menunggu Review',
             self::Approved  => 'Disetujui',
             self::Partial   => 'Disetujui Sebagian',
@@ -30,7 +28,6 @@ enum RequestStatus: string
     public function color(): string
     {
         return match($this) {
-            self::Draft     => 'secondary',
             self::Pending   => 'warning',
             self::Approved  => 'info',
             self::Partial   => 'info',
@@ -50,6 +47,6 @@ enum RequestStatus: string
     /** Status yang masih bisa dibatalkan pengaju */
     public function canBeCancelledByRequester(): bool
     {
-        return $this === self::Pending || $this === self::Draft;
+        return $this === self::Pending;
     }
 }

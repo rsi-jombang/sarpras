@@ -2,7 +2,7 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     const API = '/api/requests';
-    let itemIndex = $('.item-row').length;
+    let itemIndex = 0;
     let itemsMaster = [];
 
     // Load daftar barang dari API
@@ -128,14 +128,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 notes:             '{{ addslashes($oldItem['notes'] ?? '') }}',
             });
         @endforeach
-    @elseif(!IS_EDIT_MODE)
-        addRow(); // minimal 1 baris kosong (hanya untuk create baru)
+    @else
+        addRow(); // minimal 1 baris kosong
     @endif
 
     toggleEmptyMsg();
 
     // Submit guard
-    $('#requestForm').on('submit', function () {
+    $('#createRequestForm').on('submit', function () {
         if ($('#itemsBody .item-row').length === 0) {
             alert('Minimal satu barang harus ditambahkan.');
             return false;

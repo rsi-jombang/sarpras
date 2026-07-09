@@ -21,7 +21,6 @@ return new class extends Migration
 
             // Status & prioritas
             $table->enum('status', [
-                'draft',        // Masih draft, belum diajukan
                 'pending',      // Baru diajukan, menunggu review sarpras
                 'approved',     // Disetujui sarpras, menunggu pengambilan
                 'partial',      // Sebagian disetujui (stok tidak cukup)

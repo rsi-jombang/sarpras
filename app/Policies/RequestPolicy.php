@@ -29,20 +29,13 @@ class RequestPolicy
         return $user->isUnit();
     }
 
-    /** Hanya bisa edit jika masih DRAFT dan milik unit sendiri */
+    /** Hanya bisa edit jika masih pending dan milik unit sendiri */
     public function update(User $user, Request $request): bool
     {
         if (!$user->isUnit()) return false;
 
         return $request->unit_id === $user->unit_id
-            && $request->status === RequestStatus::Draft;
-    }
-
-    /** Hanya requester yang bisa submit DRAFT miliknya */
-    public function submit(User $user, Request $request): bool
-    {
-        return $request->requested_by === $user->id
-            && $request->status === RequestStatus::Draft;
+            && $request->status === RequestStatus::Pending;
     }
 
     /** Hanya sarpras/admin yang bisa approve atau reject */

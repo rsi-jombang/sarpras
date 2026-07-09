@@ -34,33 +34,14 @@ class RequestController extends Controller
         return view('requests.create');
     }
 
-    public function edit(RequestModel $request): View
-    {
-        $this->authorize('update', $request);
-
-        $request->load('items.item');
-
-        return view('requests.create', compact('request'));
-    }
-
     public function store(StoreRequestRequest $request): RedirectResponse
     {
         $this->authorize('create', RequestModel::class);
 
-        $req = $this->requestService->createDraft($request->user(), $request->validated());
+        $req = $this->requestService->create($request->user(), $request->validated());
 
         return redirect()->route('requests.show', $req)
-            ->with('success', 'Draft permintaan ' . $req->request_number . ' berhasil disimpan.');
-    }
-
-    public function update(StoreRequestRequest $request, RequestModel $req): RedirectResponse
-    {
-        $this->authorize('update', $req);
-
-        $this->requestService->updateDraft($req, $request->validated());
-
-        return redirect()->route('requests.show', $req)
-            ->with('success', 'Draft permintaan ' . $req->request_number . ' berhasil diperbarui.');
+            ->with('success', 'Permintaan ' . $req->request_number . ' berhasil diajukan.');
     }
 
     public function show(RequestModel $request): View
@@ -100,16 +81,6 @@ class RequestController extends Controller
             ]);
 
         return $pdf->download('bukti-permintaan-' . $request->request_number . '.pdf');
-    }
-
-    public function submit(RequestModel $request): RedirectResponse
-    {
-        $this->authorize('submit', $request);
-
-        $this->requestService->submitDraft($request);
-
-        return redirect()->route('requests.show', $request)
-            ->with('success', "Permintaan {$request->request_number} berhasil dikirim ke Sarpras.");
     }
 
     public function reviewForm(RequestModel $request): View
