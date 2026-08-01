@@ -23,7 +23,21 @@ document.addEventListener('DOMContentLoaded', function () {
         grid    : 'rgba(0,0,0,0.05)',
     };
 
+    // ── Chart instances (untuk di-destroy saat re-render) ─────
+    const charts = {
+        monthlyRequests: null,
+        monthlyPOs     : null,
+        statusDist     : null,
+        topUnits       : null,
+    };
+
     // ── Helpers ──────────────────────────────────────────────────
+    function buildUrl(base) {
+        const m = $('#filterMonth').val();
+        const y = $('#filterYear').val();
+        return `${base}?month=${m}&year=${y}`;
+    }
+
     function ajax(url) {
         return $.get(url).then(r => r.data);
     }
@@ -98,29 +112,32 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ── 1. Load Stats ───────────────────────────────────────────
-    ajax(API.stats).then(data => {
-        const keys = [
-            'total_requests', 'pending_requests', 'completed_requests',
-            'total_items', 'low_stock_items', 'total_pos',
-            'total_users', 'total_units',
-        ];
-        keys.forEach(k => {
-            const id = '#stat-' + k.replace(/_/g, '-');
-            if (data[k] !== undefined) animateCounter(id, data[k]);
+    function loadStats() {
+        ajax(buildUrl(API.stats)).then(data => {
+            const keys = [
+                'total_requests', 'pending_requests', 'completed_requests',
+                'total_items', 'low_stock_items', 'total_pos',
+                'total_users', 'total_units',
+            ];
+            keys.forEach(k => {
+                const id = '#stat-' + k.replace(/_/g, '-');
+                if (data[k] !== undefined) animateCounter(id, data[k]);
+            });
+        }).fail(() => {
+            $('[id^="stat-"]').text('!').css('color', COLORS.danger);
         });
-    }).fail(() => {
-        $('[id^="stat-"]').text('!').css('color', COLORS.danger);
-    });
+    }
 
-    // ── 2. Load Charts ──────────────────────────────────────────
-    ajax(API.charts).then(data => {
+    // ── 2. Render Charts ────────────────────────────────────────
+    function renderCharts(data) {
 
         // 2a. Monthly Requests (12 bulan) — Line + Bar combo
         const monthlyCtx = document.getElementById('chartMonthlyRequests');
         if (monthlyCtx) {
+            if (charts.monthlyRequests) charts.monthlyRequests.destroy();
             const opts = chartBaseOpts(true);
 
-            new Chart(monthlyCtx, {
+            charts.monthlyRequests = new Chart(monthlyCtx, {
                 type: 'bar',
                 data: {
                     labels: data.monthly_requests.map(m => m.label),
@@ -157,9 +174,9 @@ document.addEventListener('DOMContentLoaded', function () {
         // 2b. Monthly POs — Mixed (Bar for count, Line for value)
         const poCtx = document.getElementById('chartMonthlyPOs');
         if (poCtx) {
+            if (charts.monthlyPOs) charts.monthlyPOs.destroy();
             const opts = chartBaseOpts(true);
 
-            // Tambahkan axis kedua untuk nilai rupiah
             opts.scales.y1 = {
                 position: 'right',
                 beginAtZero: true,
@@ -172,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 border: { display: false },
             };
 
-            new Chart(poCtx, {
+            charts.monthlyPOs = new Chart(poCtx, {
                 type: 'bar',
                 data: {
                     labels: data.monthly_pos.map(m => m.label),
@@ -211,6 +228,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // 2c. Status Distribution — Doughnut
         const statusCtx = document.getElementById('chartStatusDist');
         if (statusCtx && data.status_dist) {
+            if (charts.statusDist) charts.statusDist.destroy();
             const labels = Object.keys(data.status_dist);
             const values = Object.values(data.status_dist);
             const colorPalette = [
@@ -219,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function () {
             ];
             const colors = labels.map((_, i) => colorPalette[i % colorPalette.length]);
 
-            new Chart(statusCtx, {
+            charts.statusDist = new Chart(statusCtx, {
                 type: 'doughnut',
                 data: {
                     labels,
@@ -245,7 +263,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
             });
 
-            // Custom Legend
             const legendHtml = labels.map((l, i) => `
                 <div class="d-flex align-items-center justify-content-between mb-1">
                     <div class="d-flex align-items-center gap-2">
@@ -261,13 +278,14 @@ document.addEventListener('DOMContentLoaded', function () {
         // 2d. Top 5 Units — Horizontal Bar
         const unitsCtx = document.getElementById('chartTopUnits');
         if (unitsCtx && data.top_units) {
+            if (charts.topUnits) charts.topUnits.destroy();
             const items = Array.isArray(data.top_units) ? data.top_units : Object.values(data.top_units);
             const opts = chartBaseOpts(false);
             opts.indexAxis = 'y';
             opts.scales.x.grid = { color: COLORS.grid };
             opts.scales.y.grid = { display: false };
 
-            new Chart(unitsCtx, {
+            charts.topUnits = new Chart(unitsCtx, {
                 type: 'bar',
                 data: {
                     labels: items.map(i => i.name.length > 25 ? i.name.substring(0, 25) + '...' : i.name),
@@ -284,6 +302,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 options: opts,
             });
         }
+    }
+
+    function loadCharts() {
+        ajax(buildUrl(API.charts)).then(renderCharts).fail(() => {
+            console.error('Gagal memuat chart dashboard');
+        });
+    }
+
+    // ── Initial load ────────────────────────────────────────────
+    loadStats();
+    loadCharts();
+
+    // ── Filter handler ──────────────────────────────────────────
+    $('#btnApplyFilter').on('click', function () {
+        loadStats();
+        loadCharts();
     });
 
 });

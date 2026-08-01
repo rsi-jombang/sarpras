@@ -36,7 +36,19 @@ document.addEventListener('DOMContentLoaded', function () {
         urgent : '<span class="badge bg-danger bg-opacity-10 text-danger" style="font-size:11px">Urgent</span>',
     };
 
+    // ── Chart instances (untuk di-destroy saat re-render) ─────
+    const charts = {
+        monthlyRequests: null,
+        statusDist     : null,
+    };
+
     // ── Helpers ──────────────────────────────────────────────────
+    function buildUrl(base) {
+        const m = $('#filterMonth').val();
+        const y = $('#filterYear').val();
+        return `${base}?month=${m}&year=${y}`;
+    }
+
     function ajax(url) {
         return $.get(url).then(r => r.data);
     }
@@ -49,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         function step(now) {
             const progress = Math.min((now - start) / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+            const eased = 1 - Math.pow(1 - progress, 3);
             $el.text(Math.round(from + (target - from) * eased));
             if (progress < 1) requestAnimationFrame(step);
         }
@@ -57,24 +69,27 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ── 1. Load Stats ───────────────────────────────────────────
-    ajax(API.stats).then(data => {
-        animateCounter('#stat-pending',   data.pending);
-        animateCounter('#stat-approved',  data.approved);
-        animateCounter('#stat-ready',     data.ready);
-        animateCounter('#stat-completed', data.completed);
-    }).fail(() => {
-        ['pending','approved','ready','completed'].forEach(k => {
-            $(`#stat-${k}`).text('!').css('color', COLORS.danger);
+    function loadStats() {
+        ajax(buildUrl(API.stats)).then(data => {
+            animateCounter('#stat-pending',   data.pending);
+            animateCounter('#stat-approved',  data.approved);
+            animateCounter('#stat-ready',     data.ready);
+            animateCounter('#stat-completed', data.completed);
+        }).fail(() => {
+            ['pending','approved','ready','completed'].forEach(k => {
+                $(`#stat-${k}`).text('!').css('color', COLORS.danger);
+            });
         });
-    });
+    }
 
-    // ── 2. Load Charts ──────────────────────────────────────────
-    ajax(API.charts).then(data => {
+    // ── 2. Render Charts ────────────────────────────────────────
+    function renderCharts(data) {
 
         // 2a. Monthly Requests — Bar chart
         const monthlyCtx = document.getElementById('chartMonthlyRequests');
         if (monthlyCtx) {
-            new Chart(monthlyCtx, {
+            if (charts.monthlyRequests) charts.monthlyRequests.destroy();
+            charts.monthlyRequests = new Chart(monthlyCtx, {
                 type: 'bar',
                 data: {
                     labels: data.monthly_requests.map(m => m.label),
@@ -95,6 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // 2b. Status Distribution — Doughnut chart
         const statusCtx = document.getElementById('chartStatusDist');
         if (statusCtx) {
+            if (charts.statusDist) charts.statusDist.destroy();
             const labels = Object.keys(data.status_dist);
             const values = Object.values(data.status_dist);
             const colors = labels.map(l => {
@@ -102,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return found ? found.color : COLORS.muted;
             });
 
-            new Chart(statusCtx, {
+            charts.statusDist = new Chart(statusCtx, {
                 type: 'doughnut',
                 data: {
                     labels,
@@ -128,7 +144,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
             });
 
-            // Custom Legend
             const legendHtml = labels.map((l, i) => `
                 <div class="d-flex align-items-center justify-content-between mb-1">
                     <div class="d-flex align-items-center gap-2">
@@ -140,7 +155,13 @@ document.addEventListener('DOMContentLoaded', function () {
             `).join('');
             $('#statusLegend').html(legendHtml);
         }
-    });
+    }
+
+    function loadCharts() {
+        ajax(buildUrl(API.charts)).then(renderCharts).fail(() => {
+            console.error('Gagal memuat chart dashboard');
+        });
+    }
 
     // ── 3. Load Recent Requests ─────────────────────────────────
     ajax(API.recent).then(items => {
@@ -184,6 +205,16 @@ document.addEventListener('DOMContentLoaded', function () {
         $c.html(html);
     }).fail(() => {
         $('#recentRequestsContainer').html('<div class="text-center py-3 text-danger"><i class="bi bi-exclamation-triangle me-1"></i>Gagal memuat data.</div>');
+    });
+
+    // ── Initial load ────────────────────────────────────────────
+    loadStats();
+    loadCharts();
+
+    // ── Filter handler ──────────────────────────────────────────
+    $('#btnApplyFilter').on('click', function () {
+        loadStats();
+        loadCharts();
     });
 
     // ── Chart Options Helper ────────────────────────────────────

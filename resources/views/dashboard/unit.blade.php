@@ -16,6 +16,45 @@
         </p>
     </div>
 
+    {{-- Filter Periode --}}
+    <div class="card border-0 mb-4 animate-in" style="background:var(--bg-surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);border:1px solid var(--border-subtle)">
+        <div class="card-body px-4 py-3">
+            <div class="row g-3 align-items-end">
+                <div class="col-auto">
+                    <label class="form-label fw-semibold mb-1" style="font-size:12.5px;color:var(--text-secondary)">Bulan</label>
+                    <select id="filterMonth" class="form-select form-select-sm" style="width:auto;min-width:150px;font-size:13px">
+                        <option value="1" {{ now()->month == 1 ? 'selected' : '' }}>Januari</option>
+                        <option value="2" {{ now()->month == 2 ? 'selected' : '' }}>Februari</option>
+                        <option value="3" {{ now()->month == 3 ? 'selected' : '' }}>Maret</option>
+                        <option value="4" {{ now()->month == 4 ? 'selected' : '' }}>April</option>
+                        <option value="5" {{ now()->month == 5 ? 'selected' : '' }}>Mei</option>
+                        <option value="6" {{ now()->month == 6 ? 'selected' : '' }}>Juni</option>
+                        <option value="7" {{ now()->month == 7 ? 'selected' : '' }}>Juli</option>
+                        <option value="8" {{ now()->month == 8 ? 'selected' : '' }}>Agustus</option>
+                        <option value="9" {{ now()->month == 9 ? 'selected' : '' }}>September</option>
+                        <option value="10" {{ now()->month == 10 ? 'selected' : '' }}>Oktober</option>
+                        <option value="11" {{ now()->month == 11 ? 'selected' : '' }}>November</option>
+                        <option value="12" {{ now()->month == 12 ? 'selected' : '' }}>Desember</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label fw-semibold mb-1" style="font-size:12.5px;color:var(--text-secondary)">Tahun</label>
+                    <select id="filterYear" class="form-select form-select-sm" style="width:auto;min-width:120px;font-size:13px">
+                        @for($y = now()->year; $y >= now()->year - 2; $y--)
+                            <option value="{{ $y }}" {{ now()->year == $y ? 'selected' : '' }}>{{ $y }}</option>
+                        @endfor
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="button" id="btnApplyFilter" class="btn btn-primary d-flex align-items-center gap-1"
+                            style="border-radius:var(--radius-md);font-size:13px;height:38px">
+                        <i class="bi bi-funnel"></i> Terapkan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Kartu Statistik --}}
     <div class="row g-3 mb-4 animate-in">
         @foreach([

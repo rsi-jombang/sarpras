@@ -15,11 +15,23 @@ use Illuminate\Support\Facades\DB;
 class DashboardApiController extends Controller
 {
     // -------------------------------------------------------------------------
+    // Helper: resolve month/year from request or default to current
+    // -------------------------------------------------------------------------
+    private function resolvePeriod(Request $request): array
+    {
+        $month = $request->filled('month') ? (int) $request->month : now()->month;
+        $year  = $request->filled('year') ? (int) $request->year : now()->year;
+
+        return [$month, $year];
+    }
+
+    // -------------------------------------------------------------------------
     // Stats Unit — kartu statistik untuk role unit
     // -------------------------------------------------------------------------
     public function unitStats(Request $request): JsonResponse
     {
         $unitId = $request->user()->unit_id;
+        [$month, $year] = $this->resolvePeriod($request);
 
         $base = RequestModel::where('unit_id', $unitId);
 
@@ -30,18 +42,18 @@ class DashboardApiController extends Controller
                 'approved'  => (clone $base)->whereIn('status', ['approved', 'partial'])->count(),
                 'ready'     => (clone $base)->where('status', 'ready')->count(),
                 'completed' => (clone $base)->where('status', 'completed')
-                                ->whereMonth('created_at', now()->month)
-                                ->whereYear('created_at', now()->year)
-                                ->count(),
+                                    ->whereMonth('created_at', $month)
+                                    ->whereYear('created_at', $year)
+                                    ->count(),
                 'total_this_month' => (clone $base)
-                                ->whereMonth('created_at', now()->month)
-                                ->whereYear('created_at', now()->year)
-                                ->count(),
+                                    ->whereMonth('created_at', $month)
+                                    ->whereYear('created_at', $year)
+                                    ->count(),
                 'rejected_this_month' => (clone $base)
-                                ->where('status', 'rejected')
-                                ->whereMonth('created_at', now()->month)
-                                ->whereYear('created_at', now()->year)
-                                ->count(),
+                                    ->where('status', 'rejected')
+                                    ->whereMonth('created_at', $month)
+                                    ->whereYear('created_at', $year)
+                                    ->count(),
             ],
         ]);
     }
@@ -52,10 +64,11 @@ class DashboardApiController extends Controller
     public function unitCharts(Request $request): JsonResponse
     {
         $unitId = $request->user()->unit_id;
+        [$month, $year] = $this->resolvePeriod($request);
 
-        // Permintaan per bulan 6 bulan terakhir
-        $monthly = collect(range(5, 0))->map(function ($i) use ($unitId) {
-            $date  = now()->subMonths($i);
+        // Permintaan per bulan 6 bulan terakhir (relative to selected month/year)
+        $monthly = collect(range(5, 0))->map(function ($i) use ($unitId, $month, $year) {
+            $date = \Carbon\Carbon::create($year, $month, 1)->subMonths($i);
             $count = RequestModel::where('unit_id', $unitId)
                 ->whereYear('created_at', $date->year)
                 ->whereMonth('created_at', $date->month)
@@ -66,10 +79,10 @@ class DashboardApiController extends Controller
             ];
         });
 
-        // Distribusi status bulan ini
+        // Distribusi status bulan yang dipilih
         $statusDist = RequestModel::where('unit_id', $unitId)
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
+            ->whereMonth('created_at', $month)
+            ->whereYear('created_at', $year)
             ->select('status', DB::raw('count(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status');
@@ -122,7 +135,7 @@ class DashboardApiController extends Controller
     // -------------------------------------------------------------------------
     // Stats Sarpras
     // -------------------------------------------------------------------------
-    public function sarprasStats(): JsonResponse
+    public function sarprasStats(Request $request): JsonResponse
     {
         $lowStockItems = Item::whereHas('stocks', fn($q) =>
             $q->whereColumn('quantity', '<=', 'minimum_stock')->where('minimum_stock', '>', 0)
@@ -150,11 +163,13 @@ class DashboardApiController extends Controller
     // -------------------------------------------------------------------------
     // Charts Sarpras
     // -------------------------------------------------------------------------
-    public function sarprasCharts(): JsonResponse
+    public function sarprasCharts(Request $request): JsonResponse
     {
-        // Permintaan per bulan 6 bulan terakhir (semua unit)
-        $monthlyRequests = collect(range(5, 0))->map(function ($i) {
-            $date = now()->subMonths($i);
+        [$month, $year] = $this->resolvePeriod($request);
+
+        // Permintaan per bulan 6 bulan terakhir (semua unit) - anchored to selected period
+        $monthlyRequests = collect(range(5, 0))->map(function ($i) use ($month, $year) {
+            $date = \Carbon\Carbon::create($year, $month, 1)->subMonths($i);
             return [
                 'label'     => $date->translatedFormat('M Y'),
                 'total'     => RequestModel::whereYear('created_at', $date->year)->whereMonth('created_at', $date->month)->count(),
@@ -163,25 +178,25 @@ class DashboardApiController extends Controller
             ];
         });
 
-        // Top 5 barang paling sering diminta bulan ini
+        // Top 5 barang paling sering diminta bulan yang dipilih
         $topItems = DB::table('request_items')
             ->join('requests', 'requests.id', '=', 'request_items.request_id')
             ->join('items', 'items.id', '=', 'request_items.item_id')
-            ->whereMonth('requests.created_at', now()->month)
-            ->whereYear('requests.created_at', now()->year)
+            ->whereMonth('requests.created_at', $month)
+            ->whereYear('requests.created_at', $year)
             ->select('items.name', DB::raw('SUM(request_items.quantity_requested) as total_qty'))
             ->groupBy('items.id', 'items.name')
             ->orderByDesc('total_qty')
             ->limit(5)
             ->get();
 
-        // Distribusi stok: normal, rendah, habis
+        // Distribusi stok: normal, rendah, habis (all-time, tidak perlu filter)
         $totalItems  = Item::count();
         $lowStock    = Item::whereHas('stocks', fn($q) => $q->whereColumn('quantity', '<=', 'minimum_stock')->where('minimum_stock', '>', 0))->count();
         $emptyStock  = Item::whereDoesntHave('stocks', fn($q) => $q->where('quantity', '>', 0))->count();
         $normalStock = max(0, $totalItems - $lowStock - $emptyStock);
 
-        // Pergerakan stok 7 hari terakhir
+        // Pergerakan stok 7 hari terakhir (all-time, tidak perlu filter)
         $stockMovements = collect(range(6, 0))->map(function ($i) {
             $date = now()->subDays($i);
             return [
@@ -209,7 +224,7 @@ class DashboardApiController extends Controller
     // -------------------------------------------------------------------------
     // Recent Activity Sarpras — permintaan pending & pergerakan stok terbaru
     // -------------------------------------------------------------------------
-    public function sarprasActivity(): JsonResponse
+    public function sarprasActivity(Request $request): JsonResponse
     {
         $pendingRequests = RequestModel::with(['unit', 'requester'])
             ->where('status', 'pending')
@@ -270,15 +285,20 @@ class DashboardApiController extends Controller
     // -------------------------------------------------------------------------
     // Stats Admin — gabungan semua
     // -------------------------------------------------------------------------
-    public function adminStats(): JsonResponse
+    public function adminStats(Request $request): JsonResponse
     {
+        [$month, $year] = $this->resolvePeriod($request);
+
         return response()->json([
             'success' => true,
             'data'    => [
                 // Requests
                 'total_requests'      => RequestModel::count(),
                 'pending_requests'    => RequestModel::where('status', 'pending')->count(),
-                'completed_requests'  => RequestModel::where('status', 'completed')->whereMonth('created_at', now()->month)->count(),
+                'completed_requests'  => RequestModel::where('status', 'completed')
+                                                    ->whereMonth('created_at', $month)
+                                                    ->whereYear('created_at', $year)
+                                                    ->count(),
                 // Items
                 'total_items'         => Item::count(),
                 'low_stock_items'     => Item::whereHas('stocks', fn($q) => $q->whereColumn('quantity', '<=', 'minimum_stock')->where('minimum_stock', '>', 0))->count(),
@@ -296,11 +316,13 @@ class DashboardApiController extends Controller
     // -------------------------------------------------------------------------
     // Charts Admin
     // -------------------------------------------------------------------------
-    public function adminCharts(): JsonResponse
+    public function adminCharts(Request $request): JsonResponse
     {
-        // Permintaan per bulan 12 bulan terakhir
-        $monthlyRequests = collect(range(11, 0))->map(function ($i) {
-            $date = now()->subMonths($i);
+        [$month, $year] = $this->resolvePeriod($request);
+
+        // Permintaan per bulan 12 bulan terakhir - anchored to selected year
+        $monthlyRequests = collect(range(11, 0))->map(function ($i) use ($month, $year) {
+            $date = \Carbon\Carbon::create($year, 1, 1)->addMonths($i);
             return [
                 'label'     => $date->translatedFormat('M Y'),
                 'total'     => RequestModel::whereYear('created_at', $date->year)->whereMonth('created_at', $date->month)->count(),
@@ -308,9 +330,9 @@ class DashboardApiController extends Controller
             ];
         });
 
-        // PO per bulan 6 bulan terakhir
-        $monthlyPOs = collect(range(5, 0))->map(function ($i) {
-            $date = now()->subMonths($i);
+        // PO per bulan 6 bulan terakhir - anchored to selected period
+        $monthlyPOs = collect(range(5, 0))->map(function ($i) use ($month, $year) {
+            $date = \Carbon\Carbon::create($year, $month, 1)->subMonths($i);
             return [
                 'label' => $date->translatedFormat('M Y'),
                 'total' => PurchaseOrder::whereYear('created_at', $date->year)->whereMonth('created_at', $date->month)->count(),
@@ -318,20 +340,20 @@ class DashboardApiController extends Controller
             ];
         });
 
-        // Top 5 unit paling aktif mengajukan bulan ini
+        // Top 5 unit paling aktif mengajukan bulan yang dipilih
         $topUnits = DB::table('requests')
             ->join('units', 'units.id', '=', 'requests.unit_id')
-            ->whereMonth('requests.created_at', now()->month)
-            ->whereYear('requests.created_at', now()->year)
+            ->whereMonth('requests.created_at', $month)
+            ->whereYear('requests.created_at', $year)
             ->select('units.name', DB::raw('count(*) as total'))
             ->groupBy('units.id', 'units.name')
             ->orderByDesc('total')
             ->limit(5)
             ->get();
 
-        // Distribusi status request bulan ini
-        $statusDist = RequestModel::whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
+        // Distribusi status request bulan yang dipilih
+        $statusDist = RequestModel::whereMonth('created_at', $month)
+            ->whereYear('created_at', $year)
             ->select('status', DB::raw('count(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status');
