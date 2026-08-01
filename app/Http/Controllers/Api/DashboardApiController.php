@@ -79,13 +79,21 @@ class DashboardApiController extends Controller
             ];
         });
 
-        // Distribusi status bulan yang dipilih
+        // Distribusi status bulan yang dipilih.
+        // Request dengan item yang ditolak (partial) tetap dihitung "Sebagian",
+        // walaupun sudah sampai status selesai/ready.
         $statusDist = RequestModel::where('unit_id', $unitId)
             ->whereMonth('created_at', $month)
             ->whereYear('created_at', $year)
-            ->select('status', DB::raw('count(*) as total'))
-            ->groupBy('status')
-            ->pluck('total', 'status');
+            ->withExists(['items as has_rejected_item' => fn($q) => $q->where('status', 'rejected')])
+            ->get()
+            ->groupBy(function (RequestModel $req) {
+                if ($req->has_rejected_item && in_array($req->status->value, ['ready', 'completed'])) {
+                    return 'partial';
+                }
+                return $req->status->value;
+            })
+            ->map->count();
 
         $statusLabels = [
             'pending'   => 'Menunggu',
@@ -351,12 +359,20 @@ class DashboardApiController extends Controller
             ->limit(5)
             ->get();
 
-        // Distribusi status request bulan yang dipilih
+        // Distribusi status request bulan yang dipilih.
+        // Request dengan item yang ditolak (partial) tetap dihitung "Sebagian",
+        // walaupun sudah sampai status selesai/ready — sesuai kondisi riil di lapangan.
         $statusDist = RequestModel::whereMonth('created_at', $month)
             ->whereYear('created_at', $year)
-            ->select('status', DB::raw('count(*) as total'))
-            ->groupBy('status')
-            ->pluck('total', 'status');
+            ->withExists(['items as has_rejected_item' => fn($q) => $q->where('status', 'rejected')])
+            ->get()
+            ->groupBy(function (RequestModel $req) {
+                if ($req->has_rejected_item && in_array($req->status->value, ['ready', 'completed'])) {
+                    return 'partial';
+                }
+                return $req->status->value;
+            })
+            ->map->count();
 
         $statusLabels = [
             'pending'   => 'Menunggu',
