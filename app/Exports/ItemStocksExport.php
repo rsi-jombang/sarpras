@@ -18,7 +18,10 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class ItemStocksExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithTitle, ShouldAutoSize, WithEvents
 {
-    public function __construct(private readonly array $filters) {}
+    public function __construct(
+        private readonly array $filters,
+        private readonly ?\Illuminate\Support\Collection $summary = null,
+    ) {}
 
     public function query()
     {
@@ -47,7 +50,7 @@ class ItemStocksExport implements FromQuery, WithHeadings, WithMapping, WithStyl
 
     public function headings(): array
     {
-        return ['No.', 'Kode', 'Nama Barang', 'Kategori', 'Tipe', 'Satuan', 'Total Stok', 'Jumlah Batch', 'Status Stok'];
+        return ['No.', 'Kode', 'Nama Barang', 'Kategori', 'Tipe', 'Satuan', 'Stok Awal', 'Masuk', 'Keluar', 'Tersedia', 'Status Stok'];
     }
 
     public function map($item): array
@@ -55,10 +58,16 @@ class ItemStocksExport implements FromQuery, WithHeadings, WithMapping, WithStyl
         static $no = 0;
         $no++;
 
-        $total       = (int)($item->total_stock ?? 0);
-        $batchCount  = $item->stocks->count();
+        $sum = $this->summary[$item->id] ?? [
+            'awal'     => 0,
+            'masuk'    => 0,
+            'keluar'   => 0,
+            'tersedia' => (int) ($item->total_stock ?? 0),
+        ];
+
+        $tersedia    = (int) $sum['tersedia'];
         $isLow       = $item->stocks->filter(fn($s) => $s->minimum_stock > 0 && $s->quantity <= $s->minimum_stock)->isNotEmpty();
-        $stockStatus = $total === 0 ? 'Habis' : ($isLow ? 'Rendah' : 'Normal');
+        $stockStatus = $tersedia === 0 ? 'Habis' : ($isLow ? 'Rendah' : 'Normal');
 
         return [
             $no,
@@ -67,8 +76,10 @@ class ItemStocksExport implements FromQuery, WithHeadings, WithMapping, WithStyl
             $item->category->name ?? '—',
             $item->item_type->label(),
             $item->unit_of_measure,
-            $total,
-            $batchCount,
+            (int) $sum['awal'],
+            (int) $sum['masuk'],
+            (int) $sum['keluar'],
+            $tersedia,
             $stockStatus,
         ];
     }
@@ -104,16 +115,16 @@ class ItemStocksExport implements FromQuery, WithHeadings, WithMapping, WithStyl
                     }
                 }
 
-                // Warna sel status stok
+                // Warna sel status stok (kolom K)
                 for ($row = 2; $row <= $lastRow; $row++) {
-                    $status = $sheet->getCell("I{$row}")->getValue();
+                    $status = $sheet->getCell("K{$row}")->getValue();
                     $color  = match ($status) {
                         'Habis'  => 'FFFEE2E2',
                         'Rendah' => 'FFFEF9C3',
                         default  => null,
                     };
                     if ($color) {
-                        $sheet->getStyle("I{$row}")->applyFromArray([
+                        $sheet->getStyle("K{$row}")->applyFromArray([
                             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => $color]],
                         ]);
                     }

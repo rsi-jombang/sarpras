@@ -9,8 +9,12 @@ use App\Exports\StockOpnameExport;
 use App\Models\Item;
 use App\Models\PurchaseOrder;
 use App\Models\Request as RequestModel;
+use App\Models\StockMovement;
 use App\Models\StockOpname;
+use App\Models\StockOpnameItem;
 use App\Models\Unit;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -111,16 +115,18 @@ class ReportController extends Controller
     {
         $filters = $this->stockFilters($request);
         $items   = $this->queryStocks($filters)->paginate(30)->withQueryString();
+        $summary = $this->stocksSummary($items->pluck('id'), $filters);
 
-        return view('reports.stocks', compact('items', 'filters'));
+        return view('reports.stocks', compact('items', 'filters', 'summary'));
     }
 
     public function stocksPdf(Request $request): Response
     {
         $filters = $this->stockFilters($request);
         $items   = $this->queryStocks($filters)->get();
+        $summary = $this->stocksSummary($items->pluck('id'), $filters);
 
-        $pdf = Pdf::loadView('reports.pdf.stocks', compact('items', 'filters'))
+        $pdf = Pdf::loadView('reports.pdf.stocks', compact('items', 'filters', 'summary'))
             ->setPaper('a4', 'landscape')
             ->setOptions($this->pdfOptions());
 
@@ -130,9 +136,10 @@ class ReportController extends Controller
     public function stocksExcel(Request $request): BinaryFileResponse
     {
         $filters  = $this->stockFilters($request);
+        $summary  = $this->stocksSummary($this->queryStocks($filters)->pluck('id'), $filters);
         $filename = 'laporan-stok-' . now()->format('Ymd-His') . '.xlsx';
 
-        return Excel::download(new ItemStocksExport($filters), $filename);
+        return Excel::download(new ItemStocksExport($filters, $summary), $filename);
     }
 
     private function stockFilters(Request $request): array
@@ -141,7 +148,68 @@ class ReportController extends Controller
             'item_type'    => $request->input('item_type'),
             'category_id'  => $request->input('category_id'),
             'stock_status' => $request->input('stock_status'),
+            'date_from'    => $request->input('date_from', now()->startOfMonth()->toDateString()),
+            'date_to'      => $request->input('date_to', now()->toDateString()),
         ];
+    }
+
+    /**
+     * Hitung Stok Awal / Masuk / Keluar / Tersedia per item.
+     * - Awal   : hasil opname terakhir yang ditutup sebelum date_from
+     * - Masuk  : SUM qty positif stock_movements pada periode
+     * - Keluar : SUM |qty negatif| stock_movements pada periode
+     * - Tersedia : Awal + Masuk - Keluar
+     */
+    private function stocksSummary($itemIds, array $filters): \Illuminate\Support\Collection
+    {
+        $itemIds = collect($itemIds)->filter()->unique()->values();
+
+        if ($itemIds->isEmpty()) {
+            return collect();
+        }
+
+        $dateFrom = Carbon::parse($filters['date_from'])->startOfDay();
+        $dateTo   = Carbon::parse($filters['date_to'])->endOfDay();
+
+        // Stok awal dari opname terakhir yang ditutup sebelum date_from
+        $opname = StockOpname::where('status', 'closed')
+            ->whereDate('closed_date', '<=', $dateFrom)
+            ->latest('closed_date')
+            ->first();
+
+        $awalByItem = collect();
+        if ($opname) {
+            $awalByItem = StockOpnameItem::where('stock_opname_id', $opname->id)
+                ->whereIn('item_id', $itemIds)
+                ->select('item_id', DB::raw('SUM(physical_quantity) as awal'))
+                ->groupBy('item_id')
+                ->pluck('awal', 'item_id');
+        }
+
+        // Masuk & keluar dari stock_movements pada periode
+        $movements = StockMovement::whereIn('item_id', $itemIds)
+            ->whereBetween('created_at', [$dateFrom, $dateTo])
+            ->select(
+                'item_id',
+                DB::raw('SUM(CASE WHEN quantity > 0 THEN quantity ELSE 0 END) as masuk'),
+                DB::raw('SUM(CASE WHEN quantity < 0 THEN ABS(quantity) ELSE 0 END) as keluar')
+            )
+            ->groupBy('item_id')
+            ->get()
+            ->keyBy('item_id');
+
+        return $itemIds->mapWithKeys(function ($id) use ($awalByItem, $movements) {
+            $awal   = (int) ($awalByItem[$id] ?? 0);
+            $masuk  = (int) ($movements[$id]->masuk ?? 0);
+            $keluar = (int) ($movements[$id]->keluar ?? 0);
+
+            return [$id => [
+                'awal'     => $awal,
+                'masuk'    => $masuk,
+                'keluar'   => $keluar,
+                'tersedia' => $awal + $masuk - $keluar,
+            ]];
+        });
     }
 
     private function queryStocks(array $filters)

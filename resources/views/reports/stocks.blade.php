@@ -68,6 +68,16 @@
                             </option>
                         </select>
                     </div>
+                    <div class="col-md-3">
+                        <label class="form-label" style="font-size:13px;font-weight:500">Dari Tanggal</label>
+                        <input type="date" name="date_from" class="form-control form-control-sm" style="font-size:13px"
+                               value="{{ $filters['date_from'] }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" style="font-size:13px;font-weight:500">Sampai Tanggal</label>
+                        <input type="date" name="date_to" class="form-control form-control-sm" style="font-size:13px"
+                               value="{{ $filters['date_to'] }}">
+                    </div>
                     <div class="col-md-3 d-flex gap-2 align-items-end">
                         <button type="submit" class="btn btn-primary btn-sm"
                             style="border-radius:var(--radius-md);font-size:13px">
@@ -88,8 +98,9 @@
             <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
                 <h5 class="fw-bold mb-1" style="color:var(--text-primary)">Preview Data</h5>
                 <p class="text-muted mb-0" style="font-size:12.5px">
-                    Menampilkan {{ $items->count() }} dari {{ $items->total() }} barang.
-                    Total stok: <strong>{{ number_format($items->sum('total_stock')) }}</strong> unit.
+                    Periode: <strong>{{ \Carbon\Carbon::parse($filters['date_from'])->format('d M Y') }}</strong> s/d
+                    <strong>{{ \Carbon\Carbon::parse($filters['date_to'])->format('d M Y') }}</strong>
+                    · Menampilkan {{ $items->count() }} dari {{ $items->total() }} barang.
                 </p>
             </div>
             <div class="card-body px-4 pb-4">
@@ -100,22 +111,24 @@
                                 <th>Kode</th>
                                 <th>Nama Barang</th>
                                 <th>Kategori</th>
-                                <th class="text-center">Tipe</th>
                                 <th class="text-center">Satuan</th>
-                                <th class="text-center">Total Stok</th>
-                                <th class="text-center">Batch</th>
+                                <th class="text-center">Stok Awal</th>
+                                <th class="text-center">Masuk</th>
+                                <th class="text-center">Keluar</th>
+                                <th class="text-center">Tersedia</th>
                                 <th class="text-center">Status</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($items as $item)
                                 @php
-                                    $total = (int) ($item->total_stock ?? 0);
+                                    $sum = $summary[$item->id] ?? ['awal' => 0, 'masuk' => 0, 'keluar' => 0, 'tersedia' => (int) ($item->total_stock ?? 0)];
+                                    $tersedia = (int) $sum['tersedia'];
                                     $isLow = $item->stocks
                                         ->filter(fn($s) => $s->minimum_stock > 0 && $s->quantity <= $s->minimum_stock)
                                         ->isNotEmpty();
                                     $status =
-                                        $total === 0
+                                        $tersedia === 0
                                             ? ['danger', 'Habis']
                                             : ($isLow
                                                 ? ['warning', 'Rendah']
@@ -130,20 +143,13 @@
                                         </a>
                                     </td>
                                     <td>{{ $item->category->name ?? '—' }}</td>
-                                    <td class="text-center">
-                                        @if ($item->item_type->value === 'consumable')
-                                            <span class="badge rounded-pill bg-info-subtle text-info"
-                                                style="font-size:10px">Habis Pakai</span>
-                                        @else
-                                            <span class="badge rounded-pill bg-purple-subtle text-purple"
-                                                style="font-size:10px">Inventaris</span>
-                                        @endif
-                                    </td>
                                     <td class="text-center text-muted">{{ $item->unit_of_measure }}</td>
+                                    <td class="text-center">{{ (int) $sum['awal'] }}</td>
+                                    <td class="text-center text-success fw-semibold">{{ (int) $sum['masuk'] }}</td>
+                                    <td class="text-center text-danger fw-semibold">{{ (int) $sum['keluar'] }}</td>
                                     <td class="text-center">
-                                        <span class="fw-bold text-{{ $status[0] }}">{{ $total }}</span>
+                                        <span class="fw-bold text-{{ $status[0] }}">{{ $tersedia }}</span>
                                     </td>
-                                    <td class="text-center text-muted">{{ $item->stocks->count() }}</td>
                                     <td class="text-center">
                                         <span
                                             class="badge rounded-pill bg-{{ $status[0] }}-subtle text-{{ $status[0] }}"
@@ -154,7 +160,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="text-center py-5 text-muted">
+                                    <td colspan="9" class="text-center py-5 text-muted">
                                         <i class="bi bi-inbox d-block mb-2 fs-2 opacity-50"></i>
                                         Tidak ada data yang cocok.
                                     </td>
@@ -163,7 +169,7 @@
                         </tbody>
                     </table>
                 </div>
-                {{ $items->withQueryString()->links() }}
+                {{ $items->withQueryString()->links('pagination::bootstrap-5') }}
             </div>
         </div>
 
