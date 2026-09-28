@@ -25,6 +25,15 @@
                 <i class="bi bi-file-pdf"></i> Download PDF
             </a>
 
+            {{-- Unit: Edit Draft --}}
+            @can('update', $request)
+                <a href="{{ route('requests.edit', $request) }}"
+                   class="btn btn-warning d-flex align-items-center gap-1"
+                   style="border-radius:var(--radius-md);font-size:13px">
+                    <i class="bi bi-pencil"></i> Edit Draft
+                </a>
+            @endcan
+
             {{-- Unit: Kirim Draft --}}
             @can('submit', $request)
                 <button type="button" id="btnSubmit"

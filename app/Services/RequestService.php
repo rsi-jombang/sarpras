@@ -131,6 +131,34 @@ class RequestService
     }
 
     // -------------------------------------------------------------------------
+    // Unit update draft permintaan
+    // -------------------------------------------------------------------------
+    public function update(RequestModel $request, array $data): RequestModel
+    {
+        return DB::transaction(function () use ($request, $data) {
+            $request->update([
+                'priority'     => $data['priority'],
+                'needed_date'  => $data['needed_date'] ?? null,
+                'purpose'      => $data['purpose'] ?? null,
+                'notes'        => $data['notes'] ?? null,
+            ]);
+
+            // Hapus items lama, buat ulang dari data baru
+            $request->items()->delete();
+            foreach ($data['items'] as $item) {
+                $request->items()->create([
+                    'item_id'            => $item['item_id'],
+                    'quantity_requested' => $item['quantity_requested'],
+                    'notes'              => $item['notes'] ?? null,
+                    'status'             => 'pending',
+                ]);
+            }
+
+            return $request->fresh('items.item.category');
+        });
+    }
+
+    // -------------------------------------------------------------------------
     // Unit batalkan permintaan yang masih Pending
     // -------------------------------------------------------------------------
     public function cancel(RequestModel $request): RequestModel

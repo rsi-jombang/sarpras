@@ -141,6 +141,25 @@ class RequestController extends Controller
             ->with('success', 'Permintaan selesai. Barang telah diterima.');
     }
 
+    public function edit(RequestModel $request): View
+    {
+        $this->authorize('update', $request);
+
+        $request->load('items.item.category');
+
+        return view('requests.edit', compact('request'));
+    }
+
+    public function update(StoreRequestRequest $httpRequest, RequestModel $request): RedirectResponse
+    {
+        $this->authorize('update', $request);
+
+        $this->requestService->update($request, $httpRequest->validated());
+
+        return redirect()->route('requests.show', $request)
+            ->with('success', 'Draft permintaan ' . $request->request_number . ' berhasil diperbarui.');
+    }
+
     public function cancel(Request $httpRequest, RequestModel $request): RedirectResponse
     {
         $this->authorize('cancel', $request);
