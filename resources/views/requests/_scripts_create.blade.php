@@ -13,12 +13,25 @@ document.addEventListener('DOMContentLoaded', function () {
             $('.item-select').each(function() {
                 const currentVal = $(this).val() || $(this).data('selected-id');
                 $(this).html(buildOptions(currentVal));
-                $(this).select2({
-                    theme: 'bootstrap-5',
-                    placeholder: 'Cari barang',
-                    width: '100%',
-                    dropdownParent: $(this).closest('td')
-                });
+                // Refresh tampilan stok & satuan untuk baris yang sudah terisi (mode edit)
+                if (currentVal) {
+                    const found = itemsMaster.find(i => String(i.id) === String(currentVal));
+                    if (found) {
+                        const $row = $(this).closest('.item-row');
+                        $row.find('.item-uom').text(found.unit_of_measure);
+                        const stockColor = found.total_stock === 0 ? 'danger' : (found.total_stock < 5 ? 'warning' : 'success');
+                        $row.find('.item-stock').text(found.total_stock).attr('class', `item-stock fw-semibold text-${stockColor}`);
+                        $row.find('.item-qty').attr('max', found.total_stock > 0 ? found.total_stock : 9999);
+                    }
+                }
+                if (!$(this).hasClass('select2-hidden-accessible')) {
+                    $(this).select2({
+                        theme: 'bootstrap-5',
+                        placeholder: 'Cari barang',
+                        width: '100%',
+                        dropdownParent: $(this).closest('td')
+                    });
+                }
             });
         }
     });
@@ -119,13 +132,21 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Restore old values jika ada validation error
+    // Restore old values jika ada validation error, atau item draft saat edit
     @if(old('items'))
         @foreach(old('items', []) as $i => $oldItem)
             addRow({
                 item_id:           {{ $oldItem['item_id'] ?? 'null' }},
                 quantity_requested: {{ $oldItem['quantity_requested'] ?? 1 }},
                 notes:             '{{ addslashes($oldItem['notes'] ?? '') }}',
+            });
+        @endforeach
+    @elseif(isset($request) && $request->items->isNotEmpty())
+        @foreach($request->items as $reqItem)
+            addRow({
+                item_id:           {{ $reqItem->item_id }},
+                quantity_requested: {{ $reqItem->quantity_requested }},
+                notes:             {!! json_encode($reqItem->notes ?? '') !!},
             });
         @endforeach
     @else
