@@ -17,12 +17,38 @@
             </nav>
         </div>
         @can('create', App\Models\StockOpname::class)
-            <a href="{{ route('stock-opname.create') }}" class="btn btn-primary d-flex align-items-center gap-2"
-               style="border-radius:var(--radius-md);background:var(--accent-primary);border-color:var(--accent-primary)">
-                <i class="bi bi-plus-lg"></i> Buat Opname Baru
-            </a>
+            @if($openOpname)
+                <button type="button" class="btn btn-primary d-flex align-items-center gap-2 opacity-50"
+                   title="Selesaikan {{ $openOpname->opname_number }} terlebih dahulu"
+                   style="border-radius:var(--radius-md);background:var(--accent-primary);border-color:var(--accent-primary);cursor:not-allowed">
+                    <i class="bi bi-plus-lg"></i> Buat Opname Baru
+                </button>
+            @else
+                <a href="{{ route('stock-opname.create') }}" class="btn btn-primary d-flex align-items-center gap-2"
+                   style="border-radius:var(--radius-md);background:var(--accent-primary);border-color:var(--accent-primary)">
+                    <i class="bi bi-plus-lg"></i> Buat Opname Baru
+                </a>
+            @endif
         @endcan
     </div>
+
+    @if(session('error'))
+        <div class="alert border-0 d-flex align-items-center gap-2 mb-4"
+             style="background:rgba(239,68,68,0.1);border-left:4px solid #ef4444!important;border-radius:var(--radius-md);font-size:13px">
+            <i class="bi bi-exclamation-triangle text-danger"></i> {{ session('error') }}
+        </div>
+    @endif
+
+    @if($openOpname)
+        <div class="alert border-0 d-flex align-items-center gap-3 mb-4 animate-in"
+             style="background:rgba(234,179,8,0.08);border-left:4px solid #eab308!important;border-radius:var(--radius-md);font-size:13px">
+            <i class="bi bi-exclamation-circle" style="font-size:1.1rem;color:#eab308;flex-shrink:0"></i>
+            <div>
+                Opname <a href="{{ route('stock-opname.show', $openOpname) }}" class="fw-bold text-decoration-none">{{ $openOpname->opname_number }}</a>
+                masih terbuka. Selesaikan (tutup) opname tersebut sebelum membuat yang baru.
+            </div>
+        </div>
+    @endif
 
     {{-- Statistik --}}
     <div class="row g-3 mb-4 animate-in">

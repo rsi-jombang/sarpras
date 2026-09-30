@@ -78,8 +78,8 @@
                                 <strong style="color:var(--text-secondary)">Snapshot Stok</strong>
                             </div>
                             <span class="text-muted" style="font-size:12.5px">
-                                Sistem akan otomatis merekam jumlah stok saat ini dari
-                                <strong id="totalBatch">...</strong> batch aktif di gudang.
+                                Sistem akan otomatis merekam total stok saat ini dari
+                                <strong>semua item berstok</strong> di gudang (akumulasi per item, tanpa batch).
                             </span>
                         </div>
 
@@ -101,11 +101,4 @@
 </div>
 @endsection
 
-@push('scripts')
-<script>
-// Hitung total batch aktif untuk info snapshot
-$.get('/api/items/stats', res => {
-    if (res.success) $('#totalBatch').text('semua item');
-});
-</script>
-@endpush
+

@@ -157,11 +157,11 @@
                                         <tr>
                                             <th>Barang</th>
                                             <th class="text-center">Satuan</th>
-                                            <th>Batch</th>
                                             <th class="text-center">Sistem</th>
                                             <th class="text-center">Fisik</th>
                                             <th class="text-center">Selisih</th>
                                             <th>Keterangan</th>
+                                            <th>Dihitung Oleh</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -183,7 +183,6 @@
                                                     <small class="text-muted">{{ $oi->item->code }}</small>
                                                 </td>
                                                 <td class="text-center text-muted">{{ $oi->item->unit_of_measure }}</td>
-                                                <td class="text-muted">{{ $oi->itemStock?->batch_number ?? '—' }}</td>
                                                 <td class="text-center fw-semibold">{{ $oi->system_quantity }}</td>
                                                 <td class="text-center fw-semibold">{{ $oi->physical_quantity ?? '—' }}
                                                 </td>
@@ -210,6 +209,7 @@
                                                         <span class="text-danger">Defisit {{ $diff }}</span>
                                                     @endif
                                                 </td>
+                                                <td class="text-muted" style="font-size:12px">{{ $oi->counter?->name ?? '—' }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>

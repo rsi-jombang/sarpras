@@ -319,7 +319,7 @@ class ReportController extends Controller
             $selectedOpname = StockOpname::with(['creator', 'closer'])
                 ->findOrFail($request->opname_id);
             $opnameItems = $selectedOpname->items()
-                ->with(['item.category', 'itemStock'])
+                ->with(['item.category', 'counter'])
                 ->orderBy('difference')
                 ->get();
         }
@@ -330,7 +330,7 @@ class ReportController extends Controller
     public function opnamePdf(Request $request): Response
     {
         $opname      = StockOpname::with(['creator', 'closer'])->findOrFail($request->opname_id);
-        $opnameItems = $opname->items()->with(['item.category', 'itemStock'])->orderBy('difference')->get();
+        $opnameItems = $opname->items()->with(['item.category', 'counter'])->orderBy('difference')->get();
 
         $pdf = Pdf::loadView('reports.pdf.opname', compact('opname', 'opnameItems'))
             ->setPaper('a4', 'landscape')

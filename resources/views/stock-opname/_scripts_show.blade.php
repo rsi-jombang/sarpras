@@ -14,10 +14,10 @@ document.addEventListener('DOMContentLoaded', function () {
         { data: 'DT_RowIndex',           name: 'DT_RowIndex',        orderable: false, searchable: false, className: 'text-center' },
         { data: 'item_display',          name: 'item.name' },
         { data: 'uom_display',           name: 'item.unit_of_measure', orderable: false, searchable: false, className: 'text-center' },
-        { data: 'batch_display',         name: 'itemStock.batch_number', orderable: false, searchable: false },
         { data: 'system_qty_display',    name: 'system_quantity',    className: 'text-center', searchable: false },
         { data: 'physical_qty_display',  name: 'physical_quantity',  orderable: false, searchable: false, className: 'text-center' },
         { data: 'difference_display',    name: 'difference',         orderable: false, searchable: false, className: 'text-center diff-cell' },
+        { data: 'counted_by_display',    name: 'counted_by',         orderable: false, searchable: false },
     ];
 
     const table = $('#opnameItemsTable').DataTable({
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
         table.rows().every(function () {
             const data   = this.data();
             const $row   = $(this.node());
-            const $cell  = $row.find('td:eq(5)'); // kolom physical_qty
+            const $cell  = $row.find('td:eq(4)'); // kolom physical_qty
 
             // Skip jika sudah ada input
             if ($cell.find('input[type=number]').length) return;

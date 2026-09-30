@@ -15,6 +15,7 @@ class StockOpnameItem extends Model
         'physical_quantity',
         'difference',
         'is_adjusted',
+        'counted_by',
         'notes',
     ];
 
@@ -42,6 +43,12 @@ class StockOpnameItem extends Model
     public function item(): BelongsTo
     {
         return $this->belongsTo(Item::class);
+    }
+
+    /** User terakhir yang menginput hasil fisik baris ini */
+    public function counter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'counted_by');
     }
 
     // -------------------------------------------------------------------------

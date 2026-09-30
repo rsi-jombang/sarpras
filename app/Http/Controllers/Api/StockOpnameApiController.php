@@ -134,7 +134,7 @@ class StockOpnameApiController extends Controller
         $this->authorize('view', $stockOpname);
 
         $query = $stockOpname->items()
-            ->with(['item.category', 'itemStock'])
+            ->with(['item.category', 'counter'])
             ->select('stock_opname_items.*');
 
         if ($request->filled('filter_status')) {
@@ -157,7 +157,7 @@ class StockOpnameApiController extends Controller
                     . '<small class="text-muted">' . e($oi->item->code) . ' · ' . e($oi->item->category->name) . '</small>';
             })
             ->addColumn('uom_display', fn($oi) => e($oi->item->unit_of_measure))
-            ->addColumn('batch_display', fn($oi) => e($oi->itemStock?->batch_number ?? '—'))
+            ->addColumn('counted_by_display', fn($oi) => e($oi->counter?->name ?? '—'))
             ->addColumn('system_qty_display', function ($oi) {
                 return '<span class="fw-semibold">' . $oi->system_quantity . '</span>';
             })
@@ -174,7 +174,7 @@ class StockOpnameApiController extends Controller
                 $color = $oi->difference > 0 ? 'success' : 'danger';
                 return '<span class="fw-bold text-' . $color . '">' . $sign . $oi->difference . '</span>';
             })
-            ->rawColumns(['item_display', 'system_qty_display', 'physical_qty_display', 'difference_display'])
+            ->rawColumns(['item_display', 'counted_by_display', 'system_qty_display', 'physical_qty_display', 'difference_display'])
             ->make(true);
     }
 

@@ -62,11 +62,11 @@
                 <th>Nama Barang</th>
                 <th>Kategori</th>
                 <th>Satuan</th>
-                <th>Batch</th>
                 <th class="text-right">Stok Sistem</th>
                 <th class="text-right">Stok Fisik</th>
                 <th class="text-right">Selisih</th>
                 <th>Keterangan</th>
+                <th>Dihitung Oleh</th>
             </tr>
         </thead>
         <tbody>
@@ -85,7 +85,6 @@
                     <td class="fw-bold">{{ $oi->item->name ?? '—' }}</td>
                     <td>{{ $oi->item->category->name ?? '—' }}</td>
                     <td>{{ $oi->item->unit_of_measure ?? '—' }}</td>
-                    <td>{{ $oi->itemStock?->batch_number ?? '—' }}</td>
                     <td class="text-right">{{ $oi->system_quantity }}</td>
                     <td class="text-right">{{ $oi->physical_quantity ?? '—' }}</td>
                     <td class="text-right fw-bold {{ $diff > 0 ? 'text-success' : ($diff < 0 ? 'text-danger' : '') }}">
@@ -106,6 +105,7 @@
                             <span style="color:#dc2626">Defisit {{ $diff }}</span>
                         @endif
                     </td>
+                    <td>{{ $oi->counter?->name ?? '—' }}</td>
                 </tr>
             @endforeach
         </tbody>

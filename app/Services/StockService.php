@@ -130,35 +130,105 @@ class StockService
     // =========================================================================
 
     /**
-     * Tutup opname: buat adjustment stock_movement untuk setiap item yang berbeda.
+     * Tutup opname (per item, tanpa batch): selisih total per item diterapkan
+     * ke batch tertua (FIFO) berdasarkan stok terkini saat close, agar mutasi
+     * operasional selama opname berjalan tidak tertimpa snapshot awal.
      */
     public function closeStockOpname(StockOpname $opname, int $closedBy): void
     {
         DB::transaction(function () use ($opname, $closedBy) {
-            foreach ($opname->items()->where('is_adjusted', false)->get() as $opnameItem) {
+            $opname->refresh();
+
+            if ($opname->status === 'closed') {
+                throw new \RuntimeException('Stok opname sudah ditutup.');
+            }
+
+            foreach ($opname->items()->with('item')->where('is_adjusted', false)->get() as $opnameItem) {
                 if ($opnameItem->difference === null || $opnameItem->difference === 0) {
                     $opnameItem->update(['is_adjusted' => true]);
                     continue;
                 }
 
-                $stock       = $opnameItem->itemStock;
-                $stockBefore = $stock->quantity;
-                $stockAfter  = $opnameItem->physical_quantity;
+                $itemName = $opnameItem->item?->name ?? ('#' . $opnameItem->item_id);
 
-                $stock->update(['quantity' => $stockAfter]);
+                // Basis = total stok terkini (bukan snapshot awal)
+                $currentTotal = (int) ItemStock::where('item_id', $opnameItem->item_id)->sum('quantity');
+                $physical     = (int) $opnameItem->physical_quantity;
+                $adjustment   = $physical - $currentTotal;
 
-                $this->recordMovement(
-                    itemStock:   $stock,
-                    type:        StockMovementType::Adjustment,
-                    qty:         $opnameItem->difference,
-                    stockBefore: $stockBefore,
-                    stockAfter:  $stockAfter,
-                    reference:   $opname,
-                    performedBy: $closedBy,
-                    notes:       "Penyesuaian opname {$opname->opname_number}",
-                );
+                if ($adjustment === 0) {
+                    $opnameItem->update(['is_adjusted' => true]);
+                    continue;
+                }
 
-                $opnameItem->update(['is_adjusted' => true]);
+                $stocks = ItemStock::where('item_id', $opnameItem->item_id)
+                    ->orderBy('created_at', 'asc')
+                    ->get();
+
+                if ($stocks->isEmpty()) {
+                    if ($adjustment < 0) {
+                        throw new \RuntimeException(
+                            "Tidak ada batch stok untuk item {$itemName}, penyesuaian {$adjustment} tidak dapat diterapkan. Penutupan dibatalkan."
+                        );
+                    }
+
+                    // Buat batch penyesuaian khusus
+                    $stocks = collect([ItemStock::create([
+                        'item_id'        => $opnameItem->item_id,
+                        'purchase_price' => 0,
+                        'selling_price'  => 0,
+                        'quantity'       => 0,
+                        'batch_number'   => null,
+                        'notes'          => "Batch penyesuaian opname {$opname->opname_number}",
+                    ])]);
+                }
+
+                $firstStockId = null;
+                $remaining    = $adjustment;
+
+                foreach ($stocks as $stock) {
+                    if ($remaining === 0) break;
+
+                    if ($remaining > 0) {
+                        // Surplus: bebankan seluruhnya ke batch tertua pertama
+                        $delta = $remaining;
+                    } else {
+                        // Defisit: kurangi batch tertua dulu, lanjut ke berikutnya bila kurang
+                        $delta = -min($stock->quantity, -$remaining);
+                    }
+
+                    if ($delta === 0) continue;
+
+                    $stockBefore = $stock->quantity;
+                    $stockAfter  = $stockBefore + $delta;
+
+                    $stock->update(['quantity' => $stockAfter]);
+
+                    $this->recordMovement(
+                        itemStock:   $stock,
+                        type:        StockMovementType::Adjustment,
+                        qty:         $delta,
+                        stockBefore: $stockBefore,
+                        stockAfter:  $stockAfter,
+                        reference:   $opname,
+                        performedBy: $closedBy,
+                        notes:       "Penyesuaian opname {$opname->opname_number}",
+                    );
+
+                    $firstStockId ??= $stock->id;
+                    $remaining    -= $delta;
+                }
+
+                if ($remaining !== 0) {
+                    throw new \RuntimeException(
+                        "Penyesuaian untuk item {$itemName} tidak dapat diterapkan sepenuhnya (sisa {$remaining}). Penutupan dibatalkan."
+                    );
+                }
+
+                $opnameItem->update([
+                    'item_stock_id' => $firstStockId,
+                    'is_adjusted'   => true,
+                ]);
             }
 
             $opname->update([

@@ -24,7 +24,7 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
     public function collection(): Collection
     {
         return $this->opname->items()
-            ->with(['item.category', 'itemStock'])
+            ->with(['item.category', 'counter'])
             ->orderBy('difference')
             ->get();
     }
@@ -36,7 +36,7 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
 
     public function headings(): array
     {
-        return ['No.', 'Kode Barang', 'Nama Barang', 'Kategori', 'Satuan', 'Batch', 'Stok Sistem', 'Stok Fisik', 'Selisih', 'Keterangan Selisih', 'Catatan'];
+        return ['No.', 'Kode Barang', 'Nama Barang', 'Kategori', 'Satuan', 'Stok Sistem', 'Stok Fisik', 'Selisih', 'Keterangan Selisih', 'Dihitung Oleh', 'Catatan'];
     }
 
     public function map($oi): array
@@ -58,11 +58,11 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
             $oi->item->name ?? '—',
             $oi->item->category->name ?? '—',
             $oi->item->unit_of_measure ?? '—',
-            $oi->itemStock?->batch_number ?? '—',
             $oi->system_quantity,
             $oi->physical_quantity ?? '—',
             $diff ?? '—',
             $keterangan,
+            $oi->counter?->name ?? '—',
             $oi->notes ?? '—',
         ];
     }
@@ -90,9 +90,9 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['argb' => 'FFD1D5DB']]],
                 ]);
 
-                // Warna baris berdasarkan selisih
+                // Warna baris berdasarkan selisih (kolom H)
                 for ($row = 2; $row <= $lastRow; $row++) {
-                    $diff = $sheet->getCell("I{$row}")->getValue();
+                    $diff = $sheet->getCell("H{$row}")->getValue();
                     if (is_numeric($diff)) {
                         $color = match (true) {
                             $diff < 0 => 'FFFEE2E2', // merah muda - defisit

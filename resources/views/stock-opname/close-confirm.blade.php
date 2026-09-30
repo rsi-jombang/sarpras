@@ -31,6 +31,19 @@
         </div>
     @endif
 
+    {{-- Peringatan Stok Berubah Sejak Snapshot --}}
+    @if($changedCount > 0)
+        <div class="alert border-0 d-flex align-items-start gap-3 mb-4 animate-in"
+             style="background:rgba(14,165,233,0.08);border-left:4px solid #0ea5e9!important;border-radius:var(--radius-md)">
+            <i class="bi bi-arrow-repeat text-info mt-1" style="font-size:1.1rem;flex-shrink:0"></i>
+            <div style="font-size:13px">
+                <strong style="color:var(--text-primary)">Ada {{ $changedCount }} item yang stoknya berubah sejak snapshot awal</strong><br>
+                <span class="text-muted">Terjadi mutasi operasional (PO diterima / permintaan dipenuhi) selama opname berjalan.
+                Penyesuaian akan dihitung dari kolom <strong>Stok Terkini</strong>, bukan angka snapshot.</span>
+            </div>
+        </div>
+    @endif
+
     {{-- Peringatan Item Belum Dihitung --}}
     @if($uncountedItems > 0)
         <div class="alert border-0 d-flex align-items-start gap-3 mb-4 animate-in"
@@ -132,6 +145,7 @@
                                         <th>Barang</th>
                                         <th class="text-center" width="80">Satuan</th>
                                         <th class="text-center" width="90">Stok Sistem</th>
+                                        <th class="text-center" width="90">Stok Terkini</th>
                                         <th class="text-center" width="90">Fisik</th>
                                         <th class="text-center" width="90">Selisih</th>
                                         <th width="130">Tindakan</th>
@@ -146,6 +160,12 @@
                                             </td>
                                             <td class="text-center text-muted">{{ $oi->item->unit_of_measure }}</td>
                                             <td class="text-center fw-semibold">{{ $oi->system_quantity }}</td>
+                                            <td class="text-center fw-semibold">
+                                                {{ $oi->current_total }}
+                                                @if($oi->current_total !== (int) $oi->system_quantity)
+                                                    <i class="bi bi-exclamation-circle text-info ms-1" title="Berubah sejak snapshot ({{ $oi->system_quantity }} → {{ $oi->current_total }})"></i>
+                                                @endif
+                                            </td>
                                             <td class="text-center fw-semibold">{{ $oi->physical_quantity }}</td>
                                             <td class="text-center">
                                                 @php $sign = $oi->difference > 0 ? '+' : ''; @endphp
@@ -173,6 +193,15 @@
 
                     {{-- Tombol Aksi --}}
                     @if($uncountedItems === 0)
+                        @if($changedCount > 0)
+                            <div class="form-check mt-4 p-3 rounded-3" style="background:rgba(14,165,233,0.06);border:1px solid rgba(14,165,233,0.25);font-size:13px">
+                                <input class="form-check-input" type="checkbox" id="ackChanged">
+                                <label class="form-check-label" for="ackChanged" style="color:var(--text-primary)">
+                                    Saya memahami bahwa penyesuaian dihitung dari <strong>Stok Terkini</strong>
+                                    ({{ $changedCount }} item berubah sejak snapshot awal).
+                                </label>
+                            </div>
+                        @endif
                         <div class="d-flex justify-content-end gap-2 mt-4 pt-3" style="border-top:1px solid var(--border-subtle)">
                             <a href="{{ route('stock-opname.show', $stockOpname) }}"
                                class="btn btn-outline-secondary" style="border-radius:var(--radius-md);font-size:13px">
@@ -182,6 +211,7 @@
                                 @csrf
                                 <button type="submit" class="btn btn-success d-flex align-items-center gap-2"
                                         id="btnConfirmClose"
+                                        @if($changedCount > 0) disabled @endif
                                         style="border-radius:var(--radius-md);font-size:13px">
                                     <span class="spinner-border spinner-border-sm d-none" id="btnCloseSpinner"></span>
                                     <i class="bi bi-lock"></i>
@@ -210,6 +240,9 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    $('#ackChanged').on('change', function () {
+        $('#btnConfirmClose').prop('disabled', !$(this).is(':checked'));
+    });
     $('#closeForm').on('submit', function () {
         $('#btnCloseSpinner').removeClass('d-none');
         $('#btnConfirmClose').prop('disabled', true);

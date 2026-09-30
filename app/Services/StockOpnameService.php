@@ -20,6 +20,16 @@ class StockOpnameService
     // -------------------------------------------------------------------------
     public function create(User $creator, array $data): StockOpname
     {
+        $openOpname = StockOpname::whereIn('status', ['open', 'in_progress'])
+            ->latest('id')
+            ->first();
+
+        if ($openOpname) {
+            throw new \RuntimeException(
+                'Masih ada stok opname ' . $openOpname->opname_number . ' yang belum ditutup. Selesaikan dulu sebelum membuat yang baru.'
+            );
+        }
+
         return DB::transaction(function () use ($creator, $data) {
             $opname = StockOpname::create([
                 'opname_number' => $this->numberGenerator->generateOpnameNumber(),
@@ -29,19 +39,21 @@ class StockOpnameService
                 'notes'         => $data['notes'] ?? null,
             ]);
 
-            // Snapshot seluruh item_stock yang ada saat ini
-            ItemStock::chunk(200, function ($stocks) use ($opname) {
-                foreach ($stocks as $stock) {
-                    StockOpnameItem::create([
-                        'stock_opname_id'   => $opname->id,
-                        'item_stock_id'     => $stock->id,
-                        'item_id'           => $stock->item_id,
-                        'system_quantity'   => $stock->quantity,
-                        'physical_quantity' => null,
-                        'difference'        => null,
-                    ]);
-                }
-            });
+            // Snapshot agregat per item (total seluruh batch, tanpa batch)
+            ItemStock::select('item_id', DB::raw('SUM(quantity) as total_qty'))
+                ->groupBy('item_id')
+                ->chunk(200, function ($rows) use ($opname) {
+                    foreach ($rows as $row) {
+                        StockOpnameItem::create([
+                            'stock_opname_id'   => $opname->id,
+                            'item_stock_id'     => null,
+                            'item_id'           => $row->item_id,
+                            'system_quantity'   => (int) $row->total_qty,
+                            'physical_quantity' => null,
+                            'difference'        => null,
+                        ]);
+                    }
+                });
 
             return $opname;
         });
@@ -50,9 +62,9 @@ class StockOpnameService
     // -------------------------------------------------------------------------
     // Simpan hasil hitung fisik (bisa bertahap)
     // -------------------------------------------------------------------------
-    public function updateItems(StockOpname $opname, array $data): StockOpname
+    public function updateItems(StockOpname $opname, array $data, User $counter): StockOpname
     {
-        return DB::transaction(function () use ($opname, $data) {
+        return DB::transaction(function () use ($opname, $data, $counter) {
             foreach ($data['items'] as $itemData) {
                 $opnameItem = StockOpnameItem::findOrFail($itemData['opname_item_id']);
 
@@ -65,6 +77,7 @@ class StockOpnameService
                 // Setter di model otomatis hitung difference
                 $opnameItem->physical_quantity = (int) $itemData['physical_quantity'];
                 $opnameItem->notes             = $itemData['notes'] ?? null;
+                $opnameItem->counted_by        = $counter->id;
                 $opnameItem->save();
             }
 
@@ -77,10 +90,46 @@ class StockOpnameService
     }
 
     // -------------------------------------------------------------------------
+    // Tarik item berstok yang belum tercakup ke dalam opname yang masih open
+    // -------------------------------------------------------------------------
+    public function syncItems(StockOpname $opname): int
+    {
+        return DB::transaction(function () use ($opname) {
+            $existingItemIds = $opname->items()->pluck('item_id');
+            $added = 0;
+
+            ItemStock::select('item_id', DB::raw('SUM(quantity) as total_qty'))
+                ->whereNotIn('item_id', $existingItemIds)
+                ->groupBy('item_id')
+                ->chunk(200, function ($rows) use ($opname, &$added) {
+                    foreach ($rows as $row) {
+                        StockOpnameItem::create([
+                            'stock_opname_id'   => $opname->id,
+                            'item_stock_id'     => null,
+                            'item_id'           => $row->item_id,
+                            'system_quantity'   => (int) $row->total_qty,
+                            'physical_quantity' => null,
+                            'difference'        => null,
+                        ]);
+                        $added++;
+                    }
+                });
+
+            return $added;
+        });
+    }
+
+    // -------------------------------------------------------------------------
     // Tutup opname: validasi kelengkapan lalu buat adjustment via StockService
     // -------------------------------------------------------------------------
     public function close(StockOpname $opname, User $closer): StockOpname
     {
+        $opname->refresh();
+
+        if ($opname->status === 'closed') {
+            throw new \RuntimeException('Stok opname sudah ditutup.');
+        }
+
         $uncounted = $opname->items()->whereNull('physical_quantity')->count();
 
         if ($uncounted > 0) {

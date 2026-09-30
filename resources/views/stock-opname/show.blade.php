@@ -18,6 +18,15 @@
         </div>
         <div class="d-flex gap-2 flex-wrap">
             @if($stockOpname->isOpen())
+                @can('update', $stockOpname)
+                    <form action="{{ route('stock-opname.sync-items', $stockOpname) }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-info d-flex align-items-center gap-1"
+                           style="border-radius:var(--radius-md);font-size:13px">
+                            <i class="bi bi-arrow-down-up"></i> Tarik Item Baru
+                        </button>
+                    </form>
+                @endcan
                 @can('close', $stockOpname)
                     <a href="{{ route('stock-opname.close.confirm', $stockOpname) }}"
                        class="btn btn-success d-flex align-items-center gap-1"
@@ -28,6 +37,17 @@
             @endif
         </div>
     </div>
+
+    @if($stockOpname->isOpen() && $uncoveredCount > 0)
+        <div class="alert border-0 d-flex align-items-center gap-3 mb-4 animate-in"
+             style="background:rgba(14,165,233,0.08);border-left:4px solid #0ea5e9!important;border-radius:var(--radius-md);font-size:13px">
+            <i class="bi bi-info-circle" style="font-size:1.1rem;color:#0ea5e9;flex-shrink:0"></i>
+            <div>
+                Ada <strong>{{ $uncoveredCount }} item berstok</strong> yang belum tercakup dalam opname ini
+                (lahir setelah opname dibuat). Klik <strong>Tarik Item Baru</strong> untuk menambahkannya.
+            </div>
+        </div>
+    @endif
 
     {{-- Flash --}}
     @if(session('success'))
@@ -170,10 +190,10 @@
                                             <th width="50" class="text-center">No</th>
                                             <th>Barang</th>
                                             <th width="70" class="text-center">Satuan</th>
-                                            <th width="90">Batch</th>
                                             <th width="100" class="text-center">Stok Sistem</th>
                                             <th width="110" class="text-center">Fisik</th>
                                             <th width="90" class="text-center">Selisih</th>
+                                            <th width="130">Dihitung Oleh</th>
                                         </tr>
                                     </thead>
                                     <tbody id="opnameItemsBody"></tbody>
@@ -206,10 +226,10 @@
                                         <th width="50" class="text-center">No</th>
                                         <th>Barang</th>
                                         <th width="70" class="text-center">Satuan</th>
-                                        <th width="90">Batch</th>
                                         <th width="100" class="text-center">Stok Sistem</th>
                                         <th width="110" class="text-center">Fisik</th>
                                         <th width="90" class="text-center">Selisih</th>
+                                        <th width="130">Dihitung Oleh</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>

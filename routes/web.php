@@ -167,6 +167,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/', 'store')->name('store');
         Route::get('/{stockOpname}', 'show')->name('show');
         Route::post('/{stockOpname}/items', 'updateItems')->name('update-items');
+        Route::post('/{stockOpname}/sync-items', 'syncItems')->name('sync-items');
         Route::get('/{stockOpname}/close', 'closeConfirm')->name('close.confirm');
         Route::post('/{stockOpname}/close', 'close')->name('close');
     });
