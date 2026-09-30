@@ -176,4 +176,48 @@ class StockOpnameTest extends TestCase
         $this->assertEquals($user->id, $row->fresh()->counted_by);
         $this->assertEquals($user->name, $row->fresh()->counter->name);
     }
+
+    public function test_opname_pages_render_for_sarpras(): void
+    {
+        $user = $this->makeSarpras();
+        $this->makeItemWithBatches([10]);
+
+        $opname = $this->service()->create($user, ['opname_date' => now()->toDateString()]);
+
+        $this->actingAs($user)->get(route('stock-opname.index'))->assertOk();
+        $this->actingAs($user)->get(route('stock-opname.show', $opname))->assertOk();
+        $this->actingAs($user)->get(route('stock-opname.close.confirm', $opname))->assertOk();
+    }
+
+    public function test_store_second_opname_redirects_with_error(): void
+    {
+        $user = $this->makeSarpras();
+        $this->makeItemWithBatches([10]);
+
+        $this->service()->create($user, ['opname_date' => now()->toDateString()]);
+
+        $this->actingAs($user)
+            ->post(route('stock-opname.store'), ['opname_date' => now()->toDateString()])
+            ->assertRedirect(route('stock-opname.index'))
+            ->assertSessionHas('error');
+    }
+
+    public function test_sync_items_adds_missing_items(): void
+    {
+        $user = $this->makeSarpras();
+        $item = $this->makeItemWithBatches([4]);
+
+        $opname = $this->service()->create($user, ['opname_date' => now()->toDateString()]);
+        $opname->items()->where('item_id', $item->id)->delete();
+
+        $this->actingAs($user)
+            ->post(route('stock-opname.sync-items', $opname))
+            ->assertRedirect(route('stock-opname.show', $opname))
+            ->assertSessionHas('success');
+
+        $this->assertEquals(
+            4,
+            $opname->items()->where('item_id', $item->id)->value('system_quantity')
+        );
+    }
 }

@@ -25,14 +25,30 @@ class NumberGeneratorService
     }
 
     /**
-     * Generate nomor opname: OPN-YYYY-MM
-     * Contoh: OPN-2024-01
+     * Generate nomor opname: OPN-YYYY-XXXX (sekuens per tahun agar unik
+     * walaupun beberapa opname dibuat dalam bulan yang sama).
+     * Contoh: OPN-2024-0001
+     *
+     * Sengaja tidak memakai helper generate(): nomor lama berformat
+     * OPN-YYYY-MM selalu menang pada perbandingan string max()
+     * sehingga sekuens akan macet. Di sini sekuens dihitung dari
+     * segmen numerik terakhir secara eksplisit.
      */
     public function generateOpnameNumber(): string
     {
-        $year  = now()->format('Y');
-        $month = now()->format('m');
-        return "OPN-{$year}-{$month}";
+        $year = now()->format('Y');
+
+        // Lock untuk mencegah duplicate di concurrent request
+        $numbers = DB::table('stock_opname')
+            ->where('opname_number', 'like', "OPN-{$year}-%")
+            ->lockForUpdate()
+            ->pluck('opname_number');
+
+        $seq = $numbers
+            ->map(fn($n) => (int) substr(strrchr($n, '-'), 1))
+            ->max() ?? 0;
+
+        return sprintf('OPN-%s-%04d', $year, $seq + 1);
     }
 
     private function generate(string $table, string $column, string $prefix): string

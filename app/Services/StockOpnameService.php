@@ -39,21 +39,24 @@ class StockOpnameService
                 'notes'         => $data['notes'] ?? null,
             ]);
 
-            // Snapshot agregat per item (total seluruh batch, tanpa batch)
-            ItemStock::select('item_id', DB::raw('SUM(quantity) as total_qty'))
+            // Snapshot agregat per item (total seluruh batch, tanpa batch).
+            // Catatan: tidak memakai chunk() karena chunk menambahkan
+            // ORDER BY primary key yang melanggar ONLY_FULL_GROUP_BY
+            // MySQL pada query GROUP BY.
+            $rows = ItemStock::select('item_id', DB::raw('SUM(quantity) as total_qty'))
                 ->groupBy('item_id')
-                ->chunk(200, function ($rows) use ($opname) {
-                    foreach ($rows as $row) {
-                        StockOpnameItem::create([
-                            'stock_opname_id'   => $opname->id,
-                            'item_stock_id'     => null,
-                            'item_id'           => $row->item_id,
-                            'system_quantity'   => (int) $row->total_qty,
-                            'physical_quantity' => null,
-                            'difference'        => null,
-                        ]);
-                    }
-                });
+                ->get();
+
+            foreach ($rows as $row) {
+                StockOpnameItem::create([
+                    'stock_opname_id'   => $opname->id,
+                    'item_stock_id'     => null,
+                    'item_id'           => $row->item_id,
+                    'system_quantity'   => (int) $row->total_qty,
+                    'physical_quantity' => null,
+                    'difference'        => null,
+                ]);
+            }
 
             return $opname;
         });
@@ -98,22 +101,23 @@ class StockOpnameService
             $existingItemIds = $opname->items()->pluck('item_id');
             $added = 0;
 
-            ItemStock::select('item_id', DB::raw('SUM(quantity) as total_qty'))
+            // Catatan: tidak memakai chunk(), lihat komentar di create().
+            $rows = ItemStock::select('item_id', DB::raw('SUM(quantity) as total_qty'))
                 ->whereNotIn('item_id', $existingItemIds)
                 ->groupBy('item_id')
-                ->chunk(200, function ($rows) use ($opname, &$added) {
-                    foreach ($rows as $row) {
-                        StockOpnameItem::create([
-                            'stock_opname_id'   => $opname->id,
-                            'item_stock_id'     => null,
-                            'item_id'           => $row->item_id,
-                            'system_quantity'   => (int) $row->total_qty,
-                            'physical_quantity' => null,
-                            'difference'        => null,
-                        ]);
-                        $added++;
-                    }
-                });
+                ->get();
+
+            foreach ($rows as $row) {
+                StockOpnameItem::create([
+                    'stock_opname_id'   => $opname->id,
+                    'item_stock_id'     => null,
+                    'item_id'           => $row->item_id,
+                    'system_quantity'   => (int) $row->total_qty,
+                    'physical_quantity' => null,
+                    'difference'        => null,
+                ]);
+                $added++;
+            }
 
             return $added;
         });
