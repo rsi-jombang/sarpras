@@ -2,8 +2,9 @@
 
 namespace App\Providers;
 
-use App\Models\Category;
-use App\Models\Request as RequestModel;
+use App\Models\ItemReturn;
+use App\Policies\ReturnPolicy;
+use App\Services\ItemReturnService;
 use App\Models\StockAdjustment;
 use App\Models\Unit;
 use App\Models\User;
@@ -32,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(StockService::class);
 
         // Services dengan dependency — Laravel auto-resolve via constructor injection
+        $this->app->singleton(ItemReturnService::class);
         $this->app->singleton(RequestService::class);
         $this->app->singleton(PurchaseOrderService::class);
         // $this->app->singleton(StockOpnameService::class);
@@ -50,6 +52,7 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
+        Gate::policy(ItemReturn::class, ReturnPolicy::class);
         Gate::policy(RequestModel::class,  RequestPolicy::class);
         Gate::policy(Unit::class, UnitPolicy::class);
         Gate::policy(Category::class, CategoryPolicy::class);

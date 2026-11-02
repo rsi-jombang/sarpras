@@ -181,6 +181,30 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/{stockOpname}', 'destroy')->name('destroy');
     });
 
+    // Route Pengembalian Barang
+    Route::group(['prefix' => 'item-returns', 'as' => 'item-returns.', 'controller' => App\Http\Controllers\ItemReturnController::class], function () {
+        Route::get('/', 'index')->name('index')->can('viewAny', App\Models\ItemReturn::class);
+        Route::get('/create', 'create')->name('create')->can('create', App\Models\ItemReturn::class);
+        Route::post('/', 'store')->name('store')->can('create', App\Models\ItemReturn::class);
+        Route::get('/{itemReturn}', 'show')->name('show')->can('view', 'itemReturn');
+        Route::get('/{itemReturn}/edit', 'edit')->name('edit')->can('update', 'itemReturn');
+        Route::put('/{itemReturn}', 'update')->name('update')->can('update', 'itemReturn');
+        Route::post('/{itemReturn}/submit', 'submit')->name('submit')->can('submit', 'itemReturn');
+        Route::post('/{itemReturn}/receive', 'receive')->name('receive')->can('receive', 'itemReturn');
+        Route::post('/{itemReturn}/cancel', 'cancel')->name('cancel')->can('cancel', 'itemReturn');
+        Route::delete('/{itemReturn}', 'destroy')->name('destroy')->can('delete', 'itemReturn');
+    });
+
+    // Route Pengembalian Barang Api
+    Route::group(['prefix' => 'api/item-returns', 'as' => 'api.item-returns.', 'controller' => App\Http\Controllers\Api\ItemReturnApiController::class], function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/stats', 'stats')->name('stats');
+        Route::get('/returnable/{request}', 'getReturnableItems')->name('returnable');
+        Route::post('/{itemReturn}/submit', 'submit')->name('submit');
+        Route::post('/{itemReturn}/receive', 'receive')->name('receive');
+        Route::post('/{itemReturn}/cancel', 'cancel')->name('cancel');
+    });
+
     // Route Stock Adjustment
     Route::group(['prefix' => 'stock-adjustments', 'as' => 'stock-adjustments.', 'controller' => App\Http\Controllers\StockAdjustmentController::class], function () {
         Route::get('/', 'index')->name('index')->can('viewAny', App\Models\StockAdjustment::class);

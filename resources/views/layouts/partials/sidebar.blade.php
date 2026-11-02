@@ -92,6 +92,16 @@
             </a>
         </li>
 
+        @can('viewAny', \App\Models\ItemReturn::class)
+        <li class="nav-item">
+            <a href="{{ route('item-returns.index') }}"
+                class="nav-link {{ request()->routeIs('item-returns*') ? 'active' : '' }}">
+                <i class="bi bi-arrow-return-left nav-icon"></i>
+                <span class="nav-label">Pengembalian Barang</span>
+            </a>
+        </li>
+        @endcan
+
         {{-- Stock Opname & Laporan — hidden untuk unit --}}
         @if(!auth()->user()->isUnit())
         <div class="nav-item">
