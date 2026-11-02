@@ -250,6 +250,62 @@ class StockService
     /**
      * Sesuaikan stok item secara manual: update batch, catat movement & adjustment.
      */
+    /**
+     * Terima pengembalian barang dari unit: buat batch baru per item usable
+     * dan catat movement 'return' (qty positif).
+     */
+    public function receiveReturn(\App\Models\ItemReturn $return, int $receivedBy): void
+    {
+        DB::transaction(function () use ($return, $receivedBy) {
+            foreach ($return->items as $retItem) {
+                if ($retItem->condition !== 'usable') {
+                    // damaged → hanya catat, tidak tambah stok
+                    continue;
+                }
+
+                $originalBatch = $retItem->itemStock
+                    ?: $retItem->item->stocks()->first();
+
+                $price = $originalBatch?->purchase_price ?? 0;
+
+                $stock = ItemStock::create([
+                    'item_id'        => $retItem->item_id,
+                    'purchase_price' => $price,
+                    'selling_price'  => $price,
+                    'quantity'       => $retItem->quantity_returned,
+                    'batch_number'   => $originalBatch?->batch_number,
+                    'expired_date'   => $originalBatch?->expired_date,
+                    'notes'          => "Dari Retur: {$return->return_number}",
+                ]);
+
+                $retItem->update([
+                    'item_stock_id'     => $stock->id,
+                    'quantity_accepted'  => $retItem->quantity_returned,
+                ]);
+
+                $this->recordMovement(
+                    itemStock:     $stock,
+                    type:          StockMovementType::Return,
+                    qty:           $retItem->quantity_returned,
+                    stockBefore:   0,
+                    stockAfter:    $retItem->quantity_returned,
+                    reference:     $return,
+                    performedBy:   $receivedBy,
+                    notes:         "Penerimaan retur dari {$return->unit?->name} ({$return->return_number})",
+                );
+            }
+
+            $return->update([
+                'status'      => 'received',
+                'received_by' => $receivedBy,
+                'received_at' => now(),
+            ]);
+        });
+    }
+
+    /**
+     * Sesuaikan stok item secara manual: update batch, catat movement & adjustment.
+     */
     public function adjustStock(
         \App\Models\Item $item,
         int $adjustmentQty,

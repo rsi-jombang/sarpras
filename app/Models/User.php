@@ -74,9 +74,9 @@ class User extends Authenticatable
         return $this->hasMany(Request::class, 'served_by');
     }
 
-    public function purchaseOrders(): HasMany
+    public function itemReturns(): HasMany
     {
-        return $this->hasMany(PurchaseOrder::class, 'created_by');
+        return $this->hasMany(ItemReturn::class, 'created_by');
     }
 
     public function stockMovements(): HasMany

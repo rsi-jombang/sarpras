@@ -16,6 +16,14 @@ class NumberGeneratorService
     }
 
     /**
+     * Generate nomor return: RET-YYYY-XXXX
+     */
+    public function generateReturnNumber(): string
+    {
+        return $this->generate('item_returns', 'return_number', 'RET');
+    }
+
+    /**
      * Generate nomor PO: PO-YYYY-XXXX
      * Contoh: PO-2024-0001
      */
