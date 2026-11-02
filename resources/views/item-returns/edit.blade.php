@@ -73,11 +73,7 @@
 </div>
 @push('scripts')
 <script>
-window.__EXISTING_ITEMS__ = @json($itemReturn->items->map(fn($i) => [
-    'item_id' => $i->item_id,
-    'quantity_returned' => $i->quantity_returned,
-    'notes' => $i->notes,
-])->values()->all());
+window.__EXISTING_ITEMS__ = @json($existingItems);
 </script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 @include('item-returns._scripts_create')

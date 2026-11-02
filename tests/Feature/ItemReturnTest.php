@@ -155,4 +155,23 @@ class ItemReturnTest extends TestCase
         $this->assertFalse($unit->can('delete', $r));
         $this->assertFalse($unit2->can('view', $r));
     }
+
+    public function test_item_return_views_render_for_authorized_users(): void
+    {
+        $unit = $this->makeUnit();
+        $item = $this->makeItem();
+        $r = app(ItemReturnService::class)->create($unit, [
+            'reason' => 'x',
+            'items'  => [['item_id' => $item->id, 'quantity_returned' => 1]],
+        ]);
+
+        $this->actingAs($unit)->get(route('item-returns.index'))->assertOk();
+        $this->actingAs($unit)->get(route('item-returns.create'))->assertOk();
+        $this->actingAs($unit)->get(route('item-returns.show', $r))->assertOk();
+        $this->actingAs($unit)->get(route('item-returns.edit', $r))->assertOk();
+
+        $sar = $this->makeSarpras();
+        $this->actingAs($sar)->get(route('item-returns.index'))->assertOk();
+        $this->actingAs($sar)->get(route('item-returns.show', $r))->assertOk();
+    }
 }

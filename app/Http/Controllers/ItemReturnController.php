@@ -48,7 +48,13 @@ class ItemReturnController extends Controller
     {
         $this->authorize('update', $itemReturn);
         $itemReturn->load(['items.item']);
-        return view('item-returns.edit', compact('itemReturn'));
+        $existingItems = $itemReturn->items->map(fn ($i) => [
+            'item_id'           => $i->item_id,
+            'quantity_returned' => (int) $i->quantity_returned,
+            'notes'             => $i->notes,
+        ])->values()->all();
+
+        return view('item-returns.edit', compact('itemReturn', 'existingItems'));
     }
 
     public function update(StoreItemReturnRequest $request, ItemReturn $itemReturn): RedirectResponse
